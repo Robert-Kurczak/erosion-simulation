@@ -1,46 +1,19 @@
+#include "modules/Application/Application.hpp"
+#include "modules/Application/ApplicationConfig.hpp"
 #include "raylib.h"
 
+ApplicationConfig applicationConfig_ {
+    .name = "Erosion Simulator",
+    .widthInPixels = 1280,
+    .heightInPixels = 720,
+    .framesPerSeconds = 120
+};
+
+Application application_ {applicationConfig_};
+
 int main(void) {
-    const int screenWidth = 800;
-    const int screenHeight = 450;
-
-    InitWindow(
-        screenWidth, screenHeight, "raylib [shapes] example - logo raylib"
-    );
-
-    SetTargetFPS(60);
-
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-
-        ClearBackground(RAYWHITE);
-
-        DrawRectangle(
-            screenWidth / 2 - 128, screenHeight / 2 - 128, 256, 256, BLACK
-        );
-
-        DrawRectangle(
-            screenWidth / 2 - 112,
-            screenHeight / 2 - 112,
-            224,
-            224,
-            RAYWHITE
-        );
-
-        DrawText(
-            "raylib",
-            screenWidth / 2 - 44,
-            screenHeight / 2 + 48,
-            50,
-            BLACK
-        );
-
-        DrawText("this is NOT a texture!", 350, 370, 10, GRAY);
-
-        EndDrawing();
-    }
-
-    CloseWindow();
+    application_.setup();
+    application_.enterMainLoop();
 
     return 0;
 }

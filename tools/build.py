@@ -57,7 +57,7 @@ def build_application(clean):
             [
                 "docker", "run", "--rm", "-it",
                 "-u", f"{os.getuid()}:{os.getgid()}",
-                "--volume", f"{paths.REPOSITORY_ROOT_PATH}:{paths.REPOSITORY_ROOT_MOUNT_PATH}:Z",
+                "--volume", f"{paths.REPOSITORY_ROOT_PATH}:{paths.REPOSITORY_ROOT_MOUNT_PATH}:z",
                 paths.BUILDER_IMAGE_NAME,
                 "sh", "-c",
                 f"{clean_command} && {cmake_command} && {build_command}"
