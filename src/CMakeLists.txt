@@ -8,4 +8,7 @@ file(GLOB_RECURSE SRC_FILES
     ${CMAKE_SOURCE_DIR}/*.cpp
 )
 
+find_package(raylib REQUIRED)
+
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib)
