@@ -1,0 +1,25 @@
+{
+    "name": "erosion-simulator-dev",
+    "image": "erosion-simulator-dev",
+    "runArgs": [
+        "-v",
+        "${localWorkspaceFolder}:/workspace:Z"
+    ],
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/sh"
+            },
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "xaver.clang-format",
+                "twxs.cmake",
+                "ms-vscode.cmake-tools",
+                "JacquesLucke.gcov-viewer",
+                "ms-vscode.hexeditor",
+                "ms-vscode.makefile-tools"
+            ]
+        }
+    }
+}

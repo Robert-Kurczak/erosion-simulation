@@ -2,6 +2,7 @@ FROM debian:bookworm
 
 RUN apt-get update && apt-get upgrade && apt-get install -y \
     build-essential \
+    clang \
     cmake \
     libasound2-dev \
     libx11-dev \

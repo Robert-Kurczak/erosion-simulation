@@ -5,7 +5,6 @@ APPLICATION_NAME = "erosion-simulator"
 
 DEV_DIRECTORY_PATH = Path(__file__).parent
 REPOSITORY_ROOT_PATH = DEV_DIRECTORY_PATH.parent.parent
-DOCKERFILES_DIRECTORY_PATH = DEV_DIRECTORY_PATH.joinpath("docker")
 # ===
 
 # === Files ===
@@ -15,10 +14,8 @@ APPLICATION_BINARY_PATH = REPOSITORY_ROOT_PATH.joinpath(
 # ===
 
 # === Dockerfiles ===
-BUILDER_IMAGE_NAME = "raylib-builder"
-BUILDER_DOCKERFILE_PATH = DOCKERFILES_DIRECTORY_PATH.joinpath(
-    f"{BUILDER_IMAGE_NAME}.dockerfile"
-)
+BUILDER_IMAGE_NAME = "erosion-simulator-dev"
+BUILDER_DOCKERFILE_PATH = REPOSITORY_ROOT_PATH.joinpath(".devcontainer/Dockerfile")
 # ===
 
 # === Docker volumes ===
