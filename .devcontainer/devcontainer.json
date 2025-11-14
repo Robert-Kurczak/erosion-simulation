@@ -5,6 +5,7 @@
         "-v",
         "${localWorkspaceFolder}:/workspace:Z"
     ],
+    "updateRemoteUserUID": true,
     "customizations": {
         "vscode": {
             "settings": {

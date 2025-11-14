@@ -1,33 +1,41 @@
 #include "Application.hpp"
 
-#include "raylib.h"
+#include <iostream>
+#include <raylib.h>
 
-Application::Application(ApplicationConfig config) :
-    applicationConfig_(config) {}
+void Application::setupWindow() {
+    InitWindow(0, 0, applicationConfig_.name.c_str());
+
+    const uint8_t monitorId = GetCurrentMonitor();
+    const uint32_t monitorWidth = GetMonitorWidth(monitorId);
+    const uint32_t monitorHeight = GetMonitorHeight(monitorId);
+
+    const uint32_t windowWidth =
+        monitorWidth * applicationConfig_.windowWidthScale;
+
+    const uint32_t windowHeight =
+        monitorHeight * applicationConfig_.windowHeightScale;
+
+    SetWindowSize(windowWidth, windowHeight);
+    SetWindowPosition(
+        (monitorWidth - windowWidth) / 2,
+        (monitorHeight - windowHeight) / 2
+    );
+    SetTargetFPS(applicationConfig_.framesPerSeconds);
+}
+
+Application::Application(ApplicationConfig config, IScene& scene) :
+    applicationConfig_(config),
+    scene_(scene) {}
 
 void Application::setup() {
-    InitWindow(
-        applicationConfig_.widthInPixels,
-        applicationConfig_.heightInPixels,
-        applicationConfig_.name.c_str()
-    );
-
-    SetTargetFPS(applicationConfig_.framesPerSeconds);
+    setupWindow();
+    scene_.setup();
 }
 
 void Application::enterMainLoop() {
     while (!WindowShouldClose()) {
-        BeginDrawing();
-
-        DrawRectangle(
-            applicationConfig_.widthInPixels / 4,
-            applicationConfig_.heightInPixels / 4,
-            applicationConfig_.widthInPixels / 2,
-            applicationConfig_.heightInPixels / 2,
-            RED
-        );
-
-        EndDrawing();
+        scene_.draw();
     }
 
     CloseWindow();

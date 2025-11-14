@@ -5,7 +5,7 @@
 
 struct ApplicationConfig {
     std::string name;
-    uint32_t widthInPixels;
-    uint32_t heightInPixels;
+    float windowWidthScale;
+    float windowHeightScale;
     uint8_t framesPerSeconds;
 };

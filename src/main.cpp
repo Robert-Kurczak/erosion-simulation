@@ -1,15 +1,22 @@
-#include "modules/Application/Application.hpp"
-#include "modules/Application/ApplicationConfig.hpp"
-#include "raylib.h"
+#include "Application/Application.hpp"
+#include "Application/ApplicationConfig.hpp"
+#include "Scene/TerrainScene/TerrainScene.hpp"
+#include "TerrainGenerator/HeightMapTerrainGenerator/HeightMapTerrainGenerator.hpp"
+
+#include <raylib.h>
 
 ApplicationConfig applicationConfig_ {
     .name = "Erosion Simulator",
-    .widthInPixels = 1280,
-    .heightInPixels = 720,
+    .windowWidthScale = 0.8,
+    .windowHeightScale = 0.8,
     .framesPerSeconds = 120
 };
 
-Application application_ {applicationConfig_};
+HeightMapTerrainGenerator terrainGenerator_ {};
+
+TerrainScene terrainScene_ {terrainGenerator_};
+
+Application application_ {applicationConfig_, terrainScene_};
 
 int main(void) {
     application_.setup();
