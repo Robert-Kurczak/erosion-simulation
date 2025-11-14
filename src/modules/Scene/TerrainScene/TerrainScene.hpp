@@ -7,7 +7,7 @@ class TerrainScene : public IScene {
 private:
     ITerrainGenerator& terrainGenerator_;
 
-    Camera mainCamera_ {};
+    Camera3D mainCamera_ {};
     Model terrainModel_ {};
     Vector3 terrainModelPosition_ {};
 
