@@ -1,7 +1,7 @@
 #include "Application/Application.hpp"
 #include "Application/ApplicationConfig.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
-#include "TerrainGenerator/HeightMapTerrainGenerator/HeightMapTerrainGenerator.hpp"
+#include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
 
 #include <raylib.h>
 
@@ -12,7 +12,7 @@ ApplicationConfig applicationConfig_ {
     .framesPerSeconds = 120
 };
 
-HeightMapTerrainGenerator terrainGenerator_ {};
+PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
 TerrainScene terrainScene_ {terrainGenerator_};
 

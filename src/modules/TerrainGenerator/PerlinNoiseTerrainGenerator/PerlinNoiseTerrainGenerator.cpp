@@ -1,7 +1,12 @@
-#include "HeightMapTerrainGenerator.hpp"
+#include "PerlinNoiseTerrainGenerator.hpp"
 
-Model HeightMapTerrainGenerator::generateTerrain() {
-    Image image = GenImagePerlinNoise(512, 512, 0, 0, 2);
+Model PerlinNoiseTerrainGenerator::generateTerrain(
+    const TerrainData& terrainData
+) {
+    Image image = GenImagePerlinNoise(
+        terrainData.width, terrainData.length, 0, 0, 2
+    );
+
     Texture2D texture = LoadTextureFromImage(image);
 
     Mesh mesh = GenMeshHeightmap(image, Vector3 {128, 32, 128});

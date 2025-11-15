@@ -1,8 +1,11 @@
 #pragma once
 
-#include "raylib.h"
+#include "TerrainData/TerrainData.hpp"
+
+#include <raylib.h>
+#include <stdint.h>
 
 class ITerrainGenerator {
 public:
-    virtual Model generateTerrain() = 0;
+    virtual Model generateTerrain(const TerrainData& terrainData) = 0;
 };

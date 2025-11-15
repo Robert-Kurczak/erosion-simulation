@@ -9,7 +9,7 @@ REPOSITORY_ROOT_PATH = DEV_DIRECTORY_PATH.parent.parent
 
 # === Files ===
 APPLICATION_BINARY_PATH = REPOSITORY_ROOT_PATH.joinpath(
-    f"build/package/{APPLICATION_NAME}"
+    f"build/{APPLICATION_NAME}"
 )
 # ===
 

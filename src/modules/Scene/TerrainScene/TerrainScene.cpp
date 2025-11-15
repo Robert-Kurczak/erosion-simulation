@@ -9,7 +9,7 @@ void TerrainScene::setupCamera() {
 }
 
 void TerrainScene::setupTerrain() {
-    terrainModel_ = terrainGenerator_.generateTerrain();
+    terrainModel_ = terrainGenerator_.generateTerrain(terrainData_);
 
     BoundingBox terrainBoundingBox =
         GetMeshBoundingBox(terrainModel_.meshes[0]);
