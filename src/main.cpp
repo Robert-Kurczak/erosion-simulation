@@ -2,6 +2,8 @@
 #include "Application/ApplicationConfig.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
+#include "TerrainPainter/SimpleTerrainPainter/SimpleTerrainPainter.hpp"
+#include "TerrainRenderer/TerrainRenderer.hpp"
 
 #include <raylib.h>
 
@@ -14,7 +16,15 @@ ApplicationConfig applicationConfig_ {
 
 PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
-TerrainScene terrainScene_ {terrainGenerator_};
+SimpleTerrainPainter terrainPainter_ {};
+
+TerrainRenderer terrainRenderer_ {};
+
+TerrainScene terrainScene_ {
+    terrainGenerator_,
+    terrainPainter_,
+    terrainRenderer_
+};
 
 Application application_ {applicationConfig_, terrainScene_};
 

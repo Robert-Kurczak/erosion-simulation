@@ -1,20 +1,53 @@
 #include "PerlinNoiseTerrainGenerator.hpp"
 
-Model PerlinNoiseTerrainGenerator::generateTerrain(
-    const TerrainData& terrainData
+#include <raylib.h>
+
+std::vector<double> PerlinNoiseTerrainGenerator::
+    createNormalizedHeightMap(const Image& heightMapImage) {
+    const uint8_t channelsPerPixel = 4;
+
+    const size_t pixelsInImage =
+        heightMapImage.width * heightMapImage.height;
+
+    const uint8_t* pixels = static_cast<uint8_t*>(heightMapImage.data);
+
+    std::vector<double> heightMap(pixelsInImage);
+
+    for (size_t pixelIndex = 0; pixelIndex < pixelsInImage;
+         pixelIndex++) {
+        const double height =
+            pixels[pixelIndex * channelsPerPixel] / 255.0f;
+
+        heightMap[pixelIndex] = height;
+    }
+
+    return heightMap;
+}
+
+std::vector<Color> PerlinNoiseTerrainGenerator::createInitialColorMap(
+    const Image& heightMapImage
 ) {
-    Image image = GenImagePerlinNoise(
-        terrainData.width, terrainData.length, 0, 0, 2
-    );
+    const size_t pixelsInImage =
+        heightMapImage.width * heightMapImage.height;
 
-    Texture2D texture = LoadTextureFromImage(image);
+    const std::vector<Color> colorMap(pixelsInImage, RED);
 
-    Mesh mesh = GenMeshHeightmap(image, Vector3 {128, 32, 128});
-    Model model = LoadModelFromMesh(mesh);
+    return colorMap;
+}
 
-    model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = texture;
+TerrainData PerlinNoiseTerrainGenerator::generateTerrain(
+    uint32_t resolutionX,
+    uint32_t resolutionZ
+) {
+    const Image perlinImage =
+        GenImagePerlinNoise(resolutionX, resolutionZ, 0, 0, 5);
 
-    UnloadImage(image);
+    TerrainData terrainData {
+        .resolutionX = resolutionX,
+        .resolutionZ = resolutionZ,
+        .heightMap = createNormalizedHeightMap(perlinImage),
+        .colorMap = createInitialColorMap(perlinImage)
+    };
 
-    return model;
+    return terrainData;
 }

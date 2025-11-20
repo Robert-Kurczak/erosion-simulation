@@ -3,7 +3,16 @@
 #include "../ITerrainGenerator.hpp"
 
 class PerlinNoiseTerrainGenerator : public ITerrainGenerator {
+private:
+    std::vector<double> createNormalizedHeightMap(
+        const Image& heightMapImage
+    );
+
+    std::vector<Color> createInitialColorMap(const Image& heightMapImage);
+
 public:
-    virtual Model generateTerrain(const TerrainData& terrainData
+    virtual TerrainData generateTerrain(
+        uint32_t resolutionX,
+        uint32_t resolutionY
     ) override;
 };
