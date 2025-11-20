@@ -109,5 +109,6 @@ void TerrainRenderer::setupModel(
 }
 
 void TerrainRenderer::renderModel(const TerrainData& terrainData) {
-    DrawModel(terrainModel_, terrainPosition_, 1.0f, RED);
+    DrawModel(terrainModel_, terrainPosition_, 1.0f, WHITE);
+    UpdateTexture(terrainTexture_, terrainData.colorMap.data());
 }
