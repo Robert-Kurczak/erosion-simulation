@@ -3,13 +3,13 @@
 #include "../IScene.hpp"
 #include "Terrain/TerrainData.hpp"
 #include "TerrainGenerator/ITerrainGenerator.hpp"
-#include "TerrainPainter/ITerrainPainter.hpp"
+#include "TerrainModifier/ITerrainModifier.hpp"
 #include "TerrainRenderer/ITerrainRenderer.hpp"
 
 class TerrainScene : public IScene {
 private:
     ITerrainGenerator& terrainGenerator_;
-    ITerrainPainter& terrainPainter_;
+    const std::vector<ITerrainModifier*>& terrainModifiers_;
     ITerrainRenderer& terrainRenderer_;
 
     Camera3D mainCamera_ {};
@@ -21,7 +21,7 @@ private:
 public:
     TerrainScene(
         ITerrainGenerator& terrainGenerator,
-        ITerrainPainter& terrainPainter,
+        const std::vector<ITerrainModifier*>& terrainModifiers,
         ITerrainRenderer& terrainRenderer
     );
 

@@ -29,11 +29,11 @@ void TerrainScene::setupTerrain() {
 
 TerrainScene::TerrainScene(
     ITerrainGenerator& terrainGenerator,
-    ITerrainPainter& terrainPainter,
+    const std::vector<ITerrainModifier*>& terrainModifiers,
     ITerrainRenderer& terrainRenderer
 ) :
     terrainGenerator_(terrainGenerator),
-    terrainPainter_(terrainPainter),
+    terrainModifiers_(terrainModifiers),
     terrainRenderer_(terrainRenderer) {}
 
 void TerrainScene::setup() {
@@ -46,6 +46,11 @@ void TerrainScene::draw() {
     BeginMode3D(mainCamera_);
 
     ClearBackground(RAYWHITE);
+
+    for (const auto& modifier : terrainModifiers_) {
+        modifier->modify(terrainData_);
+    }
+
     terrainRenderer_.renderModel(terrainData_);
 
     EndMode3D();

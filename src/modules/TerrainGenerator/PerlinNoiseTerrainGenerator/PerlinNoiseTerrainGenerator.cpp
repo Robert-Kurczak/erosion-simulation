@@ -30,7 +30,7 @@ std::vector<Color> PerlinNoiseTerrainGenerator::createInitialColorMap(
     const size_t pixelsInImage =
         heightMapImage.width * heightMapImage.height;
 
-    const std::vector<Color> colorMap(pixelsInImage, RED);
+    const std::vector<Color> colorMap(pixelsInImage, BLUE);
 
     return colorMap;
 }

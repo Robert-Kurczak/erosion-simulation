@@ -2,9 +2,10 @@
 #include "Application/ApplicationConfig.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
-#include "TerrainPainter/SimpleTerrainPainter/SimpleTerrainPainter.hpp"
+#include "TerrainModifier/TerrainPainter/TerrainPainter.hpp"
 #include "TerrainRenderer/TerrainRenderer.hpp"
 
+#include <array>
 #include <raylib.h>
 
 ApplicationConfig applicationConfig_ {
@@ -16,13 +17,15 @@ ApplicationConfig applicationConfig_ {
 
 PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
-SimpleTerrainPainter terrainPainter_ {};
+TerrainPainter terrainPainter_ {};
+
+const std::vector<ITerrainModifier*> terrainModifiers_ {&terrainPainter_};
 
 TerrainRenderer terrainRenderer_ {};
 
 TerrainScene terrainScene_ {
     terrainGenerator_,
-    terrainPainter_,
+    terrainModifiers_,
     terrainRenderer_
 };
 

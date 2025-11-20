@@ -7,6 +7,7 @@
 Image TerrainRenderer::convertToHeightImage(const TerrainData& terrainData
 ) {
     assert(terrainData.resolutionX <= std::numeric_limits<int>::max());
+    assert(terrainData.resolutionZ <= std::numeric_limits<int>::max());
 
     Image heightImage {
         .data =
@@ -23,16 +24,49 @@ Image TerrainRenderer::convertToHeightImage(const TerrainData& terrainData
         for (int x = 0; x < terrainData.resolutionX; x++) {
             const uint32_t pixelIndex = y * terrainData.resolutionX + x;
 
-            const uint8_t pixelValue = static_cast<uint8_t>(
+            const uint8_t pixelValue =
                 terrainData.heightMap[y * terrainData.resolutionX + x] *
-                255.0
-            );
+                255.0;
 
             heightImageData[pixelIndex] = pixelValue;
         }
     }
 
     return heightImage;
+}
+
+Image TerrainRenderer::convertToTextureImage(
+    const TerrainData& terrainData
+) {
+    assert(terrainData.resolutionX <= std::numeric_limits<int>::max());
+    assert(terrainData.resolutionZ <= std::numeric_limits<int>::max());
+
+    Image textureImage {
+        .data = MemAlloc(
+            terrainData.resolutionX * terrainData.resolutionZ * 4
+        ),
+        .width = static_cast<int>(terrainData.resolutionX),
+        .height = static_cast<int>(terrainData.resolutionZ),
+        .mipmaps = 1,
+        .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+    };
+
+    uint8_t* textureImageData = static_cast<uint8_t*>(textureImage.data);
+
+    // TODO use std::memcpy?
+    for (int y = 0; y < terrainData.resolutionZ; y++) {
+        for (int x = 0; x < terrainData.resolutionX; x++) {
+            const uint32_t pixelIndex = y * terrainData.resolutionX + x;
+            const Color pixelValue = terrainData.colorMap[pixelIndex];
+
+            textureImageData[pixelIndex * 4 + 0] = pixelValue.r;
+            textureImageData[pixelIndex * 4 + 1] = pixelValue.g;
+            textureImageData[pixelIndex * 4 + 2] = pixelValue.b;
+            textureImageData[pixelIndex * 4 + 3] = pixelValue.a;
+        }
+    }
+
+    return textureImage;
 }
 
 Vector3 TerrainRenderer::getCenteredPosition(const Model& model) {
@@ -53,18 +87,25 @@ void TerrainRenderer::setupModel(
     const TerrainModelConfig& config
 ) {
     const Image heightImage = convertToHeightImage(terrainData);
+    const Image textureImage = convertToTextureImage(terrainData);
     const Mesh terrainMesh = GenMeshHeightmap(
         heightImage,
         Vector3 {config.worldSizeX, config.worldSizeY, config.worldSizeZ}
     );
 
     terrainModel_ = LoadModelFromMesh(terrainMesh);
+    terrainTexture_ = LoadTextureFromImage(textureImage);
+
+    terrainModel_.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
+        terrainTexture_;
+
     terrainPosition_ = getCenteredPosition(terrainModel_);
     terrainPosition_.x += config.worldPositionX;
     terrainPosition_.y += config.worldPositionY;
     terrainPosition_.z += config.worldPositionZ;
 
     UnloadImage(heightImage);
+    UnloadImage(textureImage);
 }
 
 void TerrainRenderer::renderModel(const TerrainData& terrainData) {
