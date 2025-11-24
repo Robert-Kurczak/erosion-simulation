@@ -11,11 +11,11 @@ struct TerrainData {
     std::vector<double> heightMap;
     std::vector<Color> colorMap;
 
-    double& heightAt(uint32_t x, uint32_t y) {
+    double heightAt(uint32_t x, uint32_t y) const {
         return heightMap[y * resolutionX + x];
     }
 
-    Color& colorAt(uint32_t x, uint32_t y) {
+    Color colorAt(uint32_t x, uint32_t y) const {
         return colorMap[y * resolutionX + x];
     }
 };

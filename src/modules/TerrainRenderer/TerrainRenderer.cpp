@@ -1,39 +1,10 @@
 #include "TerrainRenderer.hpp"
 
 #include <cassert>
+#include <iostream>
 #include <limits>
 #include <raylib.h>
-
-Image TerrainRenderer::convertToHeightImage(const TerrainData& terrainData
-) {
-    assert(terrainData.resolutionX <= std::numeric_limits<int>::max());
-    assert(terrainData.resolutionZ <= std::numeric_limits<int>::max());
-
-    Image heightImage {
-        .data =
-            MemAlloc(terrainData.resolutionX * terrainData.resolutionZ),
-        .width = static_cast<int>(terrainData.resolutionX),
-        .height = static_cast<int>(terrainData.resolutionZ),
-        .mipmaps = 1,
-        .format = PIXELFORMAT_UNCOMPRESSED_GRAYSCALE,
-    };
-
-    uint8_t* heightImageData = static_cast<uint8_t*>(heightImage.data);
-
-    for (int y = 0; y < terrainData.resolutionZ; y++) {
-        for (int x = 0; x < terrainData.resolutionX; x++) {
-            const uint32_t pixelIndex = y * terrainData.resolutionX + x;
-
-            const uint8_t pixelValue =
-                terrainData.heightMap[y * terrainData.resolutionX + x] *
-                255.0;
-
-            heightImageData[pixelIndex] = pixelValue;
-        }
-    }
-
-    return heightImage;
-}
+#include <raymath.h>
 
 Image TerrainRenderer::convertToTextureImage(
     const TerrainData& terrainData
@@ -82,18 +53,19 @@ Vector3 TerrainRenderer::getCenteredPosition(const Model& model) {
     return centerPosition;
 }
 
+TerrainRenderer::TerrainRenderer(IMeshGenerator& meshGenerator) :
+    meshGenerator_(meshGenerator) {}
+
 void TerrainRenderer::setupModel(
     const TerrainData& terrainData,
     const TerrainModelConfig& config
 ) {
-    const Image heightImage = convertToHeightImage(terrainData);
     const Image textureImage = convertToTextureImage(terrainData);
-    const Mesh terrainMesh = GenMeshHeightmap(
-        heightImage,
-        Vector3 {config.worldSizeX, config.worldSizeY, config.worldSizeZ}
-    );
 
-    terrainModel_ = LoadModelFromMesh(terrainMesh);
+    terrainMesh_ = meshGenerator_.generateMesh(terrainData);
+    UploadMesh(&terrainMesh_, true);
+
+    terrainModel_ = LoadModelFromMesh(terrainMesh_);
     terrainTexture_ = LoadTextureFromImage(textureImage);
 
     terrainModel_.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
@@ -104,7 +76,6 @@ void TerrainRenderer::setupModel(
     terrainPosition_.y += config.worldPositionY;
     terrainPosition_.z += config.worldPositionZ;
 
-    UnloadImage(heightImage);
     UnloadImage(textureImage);
 }
 

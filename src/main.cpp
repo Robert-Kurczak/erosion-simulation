@@ -1,5 +1,6 @@
 #include "Application/Application.hpp"
 #include "Application/ApplicationConfig.hpp"
+#include "MeshGenerator/MeshGenerator.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
 #include "TerrainModifier/TerrainPainter/TerrainPainter.hpp"
@@ -21,7 +22,9 @@ TerrainPainter terrainPainter_ {};
 
 const std::vector<ITerrainModifier*> terrainModifiers_ {&terrainPainter_};
 
-TerrainRenderer terrainRenderer_ {};
+MeshGenerator meshGenerator_ {};
+
+TerrainRenderer terrainRenderer_ {meshGenerator_};
 
 TerrainScene terrainScene_ {
     terrainGenerator_,
