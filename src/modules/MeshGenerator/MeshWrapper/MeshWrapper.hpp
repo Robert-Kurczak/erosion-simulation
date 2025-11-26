@@ -15,16 +15,25 @@ public:
     MeshWrapper(const Vector2& resolution);
 
     void addVertex(const Vector3& coords);
+
     void addTextureCoords(
-        const Vector3& coords,
+        const Vector2& index,
         const Vector2& resolution
     );
+
     void addNormal(const Vector3 coords);
-    void addTraingle(
+
+    void addTriangle(
         const Vector3& pointA,
         const Vector3& pointB,
-        const Vector3& pointC,
-        const Vector2 resolution
+        const Vector3& pointC
+    );
+
+    void addTextureTriangle(
+        const Vector2& pointAIndex,
+        const Vector2& pointBIndex,
+        const Vector2& pointCIndex,
+        const Vector2& resolution
     );
 
     Mesh& getMesh();

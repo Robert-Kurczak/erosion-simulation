@@ -13,6 +13,8 @@ private:
 public:
     virtual TerrainData generateTerrain(
         uint32_t resolutionX,
-        uint32_t resolutionY
+        uint32_t resolutionY,
+        float featureSize,
+        uint32_t seed
     ) override;
 };

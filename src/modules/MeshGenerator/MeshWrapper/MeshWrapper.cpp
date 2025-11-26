@@ -34,14 +34,11 @@ void MeshWrapper::addNormal(const Vector3 coords) {
 }
 
 void MeshWrapper::addTextureCoords(
-    const Vector3& coords,
+    const Vector2& index,
     const Vector2& resolution
 ) {
-    mesh_.texcoords[textureCoordIndex + 0] =
-        (coords.x / float(resolution.x - 1));
-
-    mesh_.texcoords[textureCoordIndex + 1] =
-        (coords.z / float(resolution.y - 1));
+    mesh_.texcoords[textureCoordIndex + 0] = (index.x / resolution.x - 1);
+    mesh_.texcoords[textureCoordIndex + 1] = (index.y / resolution.y - 1);
 
     textureCoordIndex += 2;
 }
@@ -54,19 +51,14 @@ void MeshWrapper::addVertex(const Vector3& coords) {
     vertexIndex += 3;
 }
 
-void MeshWrapper::addTraingle(
+void MeshWrapper::addTriangle(
     const Vector3& pointA,
     const Vector3& pointB,
-    const Vector3& pointC,
-    const Vector2 resolution
+    const Vector3& pointC
 ) {
     addVertex(pointA);
     addVertex(pointB);
     addVertex(pointC);
-
-    addTextureCoords(pointA, resolution);
-    addTextureCoords(pointB, resolution);
-    addTextureCoords(pointC, resolution);
 
     const Vector3 vectorAB = Vector3Subtract(pointB, pointA);
     const Vector3 vectorAC = Vector3Subtract(pointC, pointA);
@@ -76,6 +68,17 @@ void MeshWrapper::addTraingle(
     addNormal(normal);
     addNormal(normal);
     addNormal(normal);
+}
+
+void MeshWrapper::addTextureTriangle(
+    const Vector2& pointAIndex,
+    const Vector2& pointBIndex,
+    const Vector2& pointCIndex,
+    const Vector2& resolution
+) {
+    addTextureCoords(pointAIndex, resolution);
+    addTextureCoords(pointBIndex, resolution);
+    addTextureCoords(pointCIndex, resolution);
 }
 
 Mesh& MeshWrapper::getMesh() {

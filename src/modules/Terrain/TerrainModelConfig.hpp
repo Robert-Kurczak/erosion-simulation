@@ -1,11 +1,8 @@
 #pragma once
 
-struct TerrainModelConfig {
-    float worldSizeX;
-    float worldSizeY;
-    float worldSizeZ;
+#include <raylib.h>
 
-    float worldPositionX;
-    float worldPositionY;
-    float worldPositionZ;
+struct TerrainModelConfig {
+    Vector3 worldSize;
+    Vector3 worldPosition;
 };

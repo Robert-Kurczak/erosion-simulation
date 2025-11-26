@@ -1,7 +1,6 @@
 #include "TerrainRenderer.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <limits>
 #include <raylib.h>
 #include <raymath.h>
@@ -62,7 +61,9 @@ void TerrainRenderer::setupModel(
 ) {
     const Image textureImage = convertToTextureImage(terrainData);
 
-    terrainMesh_ = meshGenerator_.generateMesh(terrainData);
+    terrainMesh_ =
+        meshGenerator_.generateMesh(terrainData, config.worldSize);
+
     UploadMesh(&terrainMesh_, true);
 
     terrainModel_ = LoadModelFromMesh(terrainMesh_);
@@ -71,15 +72,21 @@ void TerrainRenderer::setupModel(
     terrainModel_.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
         terrainTexture_;
 
-    terrainPosition_ = getCenteredPosition(terrainModel_);
-    terrainPosition_.x += config.worldPositionX;
-    terrainPosition_.y += config.worldPositionY;
-    terrainPosition_.z += config.worldPositionZ;
+    terrainPosition_ = config.worldPosition;
 
     UnloadImage(textureImage);
 }
 
 void TerrainRenderer::renderModel(const TerrainData& terrainData) {
-    DrawModel(terrainModel_, terrainPosition_, 1.0f, WHITE);
+    meshGenerator_.updateMesh(terrainMesh_, terrainData);
+    UpdateMeshBuffer(
+        terrainMesh_,
+        0,
+        terrainMesh_.vertices,
+        terrainMesh_.vertexCount,
+        0
+    );
+
     UpdateTexture(terrainTexture_, terrainData.colorMap.data());
+    DrawModel(terrainModel_, terrainPosition_, 1.0f, WHITE);
 }

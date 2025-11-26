@@ -1,6 +1,5 @@
 #include "Application.hpp"
 
-#include <iostream>
 #include <raylib.h>
 
 void Application::setupWindow() {

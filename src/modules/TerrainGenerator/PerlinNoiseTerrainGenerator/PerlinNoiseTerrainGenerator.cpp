@@ -37,10 +37,17 @@ std::vector<Color> PerlinNoiseTerrainGenerator::createInitialColorMap(
 
 TerrainData PerlinNoiseTerrainGenerator::generateTerrain(
     uint32_t resolutionX,
-    uint32_t resolutionZ
+    uint32_t resolutionZ,
+    float featureSize,
+    uint32_t seed
 ) {
-    const Image perlinImage =
-        GenImagePerlinNoise(resolutionX, resolutionZ, 0, 0, 5);
+    const Image perlinImage = GenImagePerlinNoise(
+        resolutionX,
+        resolutionZ,
+        resolutionX * (seed % 256),
+        resolutionZ * (seed % 512),
+        featureSize
+    );
 
     TerrainData terrainData {
         .resolutionX = resolutionX,

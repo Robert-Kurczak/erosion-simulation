@@ -13,15 +13,23 @@ void TerrainScene::setupCamera() {
 }
 
 void TerrainScene::setupTerrain() {
-    terrainData_ = terrainGenerator_.generateTerrain(512, 512);
+    const uint32_t resolutionX = 2048;
+    const uint32_t resolutionZ = 2048;
+    const float featureSize = 1.0f;
+    const uint32_t seed = 20;
+
+    terrainData_ = terrainGenerator_.generateTerrain(
+        resolutionX, resolutionZ, featureSize, seed
+    );
 
     TerrainModelConfig terrainModelConfig {
-        .worldSizeX = 128,
-        .worldSizeY = 16,
-        .worldSizeZ = 128,
-        .worldPositionX = 0,
-        .worldPositionY = 0,
-        .worldPositionZ = 0
+        .worldSize =
+            Vector3 {
+                     .x = resolutionX / 16,
+                     .y = resolutionX / 32,
+                     .z = resolutionZ / 16,
+                     },
+        .worldPosition = Vector3 {.x = 0, .y = 0, .z = 0}
     };
 
     terrainRenderer_.setupModel(terrainData_, terrainModelConfig);
