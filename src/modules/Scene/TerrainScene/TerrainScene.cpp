@@ -53,7 +53,7 @@ void TerrainScene::draw() {
     BeginDrawing();
     BeginMode3D(mainCamera_);
 
-    ClearBackground(RAYWHITE);
+    ClearBackground(DARKGRAY);
 
     for (const auto& modifier : terrainModifiers_) {
         modifier->modify(terrainData_);
@@ -62,5 +62,7 @@ void TerrainScene::draw() {
     terrainRenderer_.renderModel(terrainData_);
 
     EndMode3D();
+    DrawText(TextFormat("FPS: %d", GetFPS()), 10, 10, 30, BLACK);
+
     EndDrawing();
 }
