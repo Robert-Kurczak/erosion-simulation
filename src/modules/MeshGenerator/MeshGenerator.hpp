@@ -8,9 +8,9 @@ class MeshGenerator : public IMeshGenerator {
 private:
     Vector3 getPoint(
         const Vector2& index,
+        const TerrainData& terrainData,
         const Vector3& scale,
-        const Vector3& offset,
-        const TerrainData& terrainData
+        const Vector3& offset
     );
 
 public:
@@ -19,6 +19,9 @@ public:
         const Vector3& worldSize
     ) override;
 
-    virtual void updateMesh(Mesh& mesh, const TerrainData& terrainData)
-        override;
+    virtual void updateMesh(
+        Mesh& mesh,
+        const TerrainData& terrainData,
+        const Vector3& worldSize
+    ) override;
 };

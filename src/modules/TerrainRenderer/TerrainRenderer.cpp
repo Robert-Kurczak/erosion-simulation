@@ -73,12 +73,16 @@ void TerrainRenderer::setupModel(
         terrainTexture_;
 
     terrainPosition_ = config.worldPosition;
+    terrainWorldSize_ = config.worldSize;
 
     UnloadImage(textureImage);
 }
 
 void TerrainRenderer::renderModel(const TerrainData& terrainData) {
-    meshGenerator_.updateMesh(terrainMesh_, terrainData);
+    meshGenerator_.updateMesh(
+        terrainMesh_, terrainData, terrainWorldSize_
+    );
+
     UpdateMeshBuffer(
         terrainMesh_,
         0,

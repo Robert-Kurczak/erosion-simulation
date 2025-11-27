@@ -37,8 +37,11 @@ void MeshWrapper::addTextureCoords(
     const Vector2& index,
     const Vector2& resolution
 ) {
-    mesh_.texcoords[textureCoordIndex + 0] = (index.x / resolution.x - 1);
-    mesh_.texcoords[textureCoordIndex + 1] = (index.y / resolution.y - 1);
+    mesh_.texcoords[textureCoordIndex + 0] =
+        (index.x / (resolution.x - 1));
+
+    mesh_.texcoords[textureCoordIndex + 1] =
+        (index.y / (resolution.y - 1));
 
     textureCoordIndex += 2;
 }

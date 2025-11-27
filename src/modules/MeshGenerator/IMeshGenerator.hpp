@@ -15,6 +15,7 @@ public:
 
     virtual void updateMesh(
         Mesh& mesh,
-        const TerrainData& terrainData
+        const TerrainData& terrainData,
+        const Vector3& worldSize
     ) = 0;
 };

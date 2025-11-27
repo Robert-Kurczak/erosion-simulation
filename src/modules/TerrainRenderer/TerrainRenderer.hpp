@@ -13,6 +13,7 @@ private:
     Model terrainModel_;
     Texture2D terrainTexture_;
     Vector3 terrainPosition_;
+    Vector3 terrainWorldSize_;
 
     Image convertToTextureImage(const TerrainData& terrainData);
     Vector3 getCenteredPosition(const Model& model);
