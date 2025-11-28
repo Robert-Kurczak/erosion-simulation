@@ -10,6 +10,7 @@ private:
     uint32_t vertexIndex = 0;
     uint32_t textureCoordIndex = 0;
     uint32_t normalIndex = 0;
+    uint32_t colorIndex = 0;
 
 public:
     MeshWrapper(const Vector2& resolution);
@@ -22,6 +23,8 @@ public:
     );
 
     void addNormal(const Vector3 coords);
+
+    void addColor(const Color& color);
 
     void addTriangle(
         const Vector3& pointA,

@@ -24,8 +24,8 @@ Image TerrainRenderer::convertToTextureImage(
     uint8_t* textureImageData = static_cast<uint8_t*>(textureImage.data);
 
     // TODO use std::memcpy?
-    for (int y = 0; y < terrainData.resolutionZ; y++) {
-        for (int x = 0; x < terrainData.resolutionX; x++) {
+    for (uint32_t y = 0; y < terrainData.resolutionZ; y++) {
+        for (uint32_t x = 0; x < terrainData.resolutionX; x++) {
             const uint32_t pixelIndex = y * terrainData.resolutionX + x;
             const Color pixelValue = terrainData.colorMap[pixelIndex];
 
@@ -37,19 +37,6 @@ Image TerrainRenderer::convertToTextureImage(
     }
 
     return textureImage;
-}
-
-Vector3 TerrainRenderer::getCenteredPosition(const Model& model) {
-    BoundingBox terrainBoundingBox =
-        GetMeshBoundingBox(terrainModel_.meshes[0]);
-
-    const Vector3 centerPosition = {
-        -(terrainBoundingBox.min.x + terrainBoundingBox.max.x) / 2.0f,
-        0,
-        -(terrainBoundingBox.min.z + terrainBoundingBox.max.z) / 2.0f
-    };
-
-    return centerPosition;
 }
 
 TerrainRenderer::TerrainRenderer(IMeshGenerator& meshGenerator) :

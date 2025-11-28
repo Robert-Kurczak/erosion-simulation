@@ -16,7 +16,6 @@ private:
     Vector3 terrainWorldSize_;
 
     Image convertToTextureImage(const TerrainData& terrainData);
-    Vector3 getCenteredPosition(const Model& model);
 
 public:
     TerrainRenderer(IMeshGenerator& meshGenerator);

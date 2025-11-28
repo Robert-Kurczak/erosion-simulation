@@ -13,8 +13,8 @@ void TerrainScene::setupCamera() {
 }
 
 void TerrainScene::setupTerrain() {
-    const uint32_t resolutionX = 2048;
-    const uint32_t resolutionZ = 2048;
+    const uint32_t resolutionX = 100;
+    const uint32_t resolutionZ = 100;
     const float featureSize = 1.0f;
     const uint32_t seed = 20;
 
@@ -25,9 +25,9 @@ void TerrainScene::setupTerrain() {
     TerrainModelConfig terrainModelConfig {
         .worldSize =
             Vector3 {
-                     .x = resolutionX / 16,
-                     .y = resolutionX / 32,
-                     .z = resolutionZ / 16,
+                     .x = 128,
+                     .y = 64,
+                     .z = 128,
                      },
         .worldPosition = Vector3 {.x = 0, .y = 0, .z = 0}
     };
