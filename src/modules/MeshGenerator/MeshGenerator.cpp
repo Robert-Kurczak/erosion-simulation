@@ -3,89 +3,142 @@
 #include "MeshWrapper/MeshWrapper.hpp"
 
 #include <cmath>
+#include <cstring>
 #include <iostream>
 #include <raymath.h>
 
-Vector3 MeshGenerator::getPoint(
-    const Vector2& index,
-    const TerrainData& terrainData,
-    const Vector3& scale,
-    const Vector3& offset
+void MeshGenerator::setupVertices(
+    Mesh& mesh,
+    const TerrainData& data,
+    const Vector3& worldSize
 ) {
-    const Vector3 point {
-        .x = index.x * scale.x,
-        .y = float(terrainData.heightAt(index) * scale.y),
-        .z = index.y * scale.z
+    const uint8_t coordsPerVertex = 3;
+    const uint32_t vertexCount = data.heightMap.size();
+
+    const Vector3 scale {
+        worldSize.x / (data.resolutionX - 1),
+        worldSize.y,
+        worldSize.z / (data.resolutionZ - 1)
     };
 
-    return Vector3Add(point, offset);
+    const Vector3 offset {
+        -float(data.resolutionX - 1) / 2.0f,
+        0.0f,
+        -float(data.resolutionZ - 1) / 2.0f
+    };
+
+    mesh.vertexCount = vertexCount;
+    mesh.vertices =
+        (float*) MemAlloc(vertexCount * coordsPerVertex * sizeof(float));
+
+    uint32_t vertexIndex = 0;
+    for (uint32_t z = 0; z < data.resolutionZ; z++) {
+        for (uint32_t x = 0; x < data.resolutionX; x++) {
+            mesh.vertices[vertexIndex + 0] =
+                (float(x) + offset.x) * scale.x;
+            mesh.vertices[vertexIndex + 1] =
+                (float(data.heightAt(x, z)) + offset.y) * scale.y;
+            mesh.vertices[vertexIndex + 2] =
+                (float(z) + offset.z) * scale.z;
+
+            vertexIndex += 3;
+        }
+    }
 }
+
+void MeshGenerator::setupTriangles(Mesh& mesh, const TerrainData& data) {
+    // A-----B
+    // |   / |
+    // | /   |
+    // C-----D
+    //
+    // CounterClockwise
+    // A, C, B
+    // B, C, D
+    const uint32_t squareCount =
+        (data.resolutionX - 1) * (data.resolutionZ - 1);
+
+    const uint32_t triangleCount = squareCount * 2;
+
+    mesh.triangleCount = triangleCount;
+    mesh.indices =
+        (uint16_t*) MemAlloc(triangleCount * 3 * sizeof(uint16_t));
+
+    uint16_t triangleIndex = 0;
+    for (uint32_t z = 0; z < data.resolutionZ - 1; z++) {
+        for (uint32_t x = 0; x < data.resolutionX - 1; x++) {
+            const uint32_t vertexAIndex = x + data.resolutionX * z;
+            const uint32_t vertexBIndex = (x + 1) + data.resolutionX * z;
+            const uint32_t vertexCIndex = x + data.resolutionX * (z + 1);
+            const uint32_t vertexDIndex =
+                (x + 1) + data.resolutionX * (z + 1);
+
+            mesh.indices[triangleIndex + 0] = vertexAIndex;
+            mesh.indices[triangleIndex + 1] = vertexCIndex;
+            mesh.indices[triangleIndex + 2] = vertexBIndex;
+
+            triangleIndex += 3;
+
+            mesh.indices[triangleIndex + 0] = vertexBIndex;
+            mesh.indices[triangleIndex + 1] = vertexCIndex;
+            mesh.indices[triangleIndex + 2] = vertexDIndex;
+
+            triangleIndex += 3;
+        }
+    }
+}
+
+void MeshGenerator::setupTextureCoordinates(
+    Mesh& mesh,
+    const TerrainData& data
+) {
+    const uint32_t vertexCount = data.heightMap.size();
+    const uint8_t coordsPerTexture = 2;
+
+    mesh.texcoords =
+        (float*) MemAlloc(vertexCount * coordsPerTexture * sizeof(float));
+
+    uint32_t textCoordIndex = 0;
+    for (uint32_t z = 0; z < data.resolutionZ; z++) {
+        for (uint32_t x = 0; x < data.resolutionX; x++) {
+            const float xCoord = float(x) / float(data.resolutionX - 1);
+            const float yCoord = float(z) / float(data.resolutionZ - 1);
+
+            mesh.texcoords[textCoordIndex + 0] = xCoord;
+            mesh.texcoords[textCoordIndex + 1] = yCoord;
+
+            textCoordIndex += 2;
+        }
+    }
+}
+
+void MeshGenerator::setupLighting(Mesh& mesh, const TerrainData& data) {}
+
+void MeshGenerator::updateVertices(Mesh& mesh, const TerrainData& data) {
+    uint32_t vertexIndex = 0;
+    for (uint32_t z = 0; z < data.resolutionZ; z++) {
+        for (uint32_t x = 0; x < data.resolutionX; x++) {
+            mesh.vertices[vertexIndex + 1] = data.heightAt(x, z);
+
+            vertexIndex += 3;
+        }
+    }
+}
+
+void MeshGenerator::updateLighting(Mesh& mesh, const TerrainData& data) {}
 
 Mesh MeshGenerator::generateMesh(
     const TerrainData& terrainData,
     const Vector3& worldSize
 ) {
-    const Vector2 resolution {
-        .x = float(terrainData.resolutionX),
-        .y = float(terrainData.resolutionZ)
-    };
+    Mesh mesh {};
 
-    const Vector3 scale {
-        .x = worldSize.x / resolution.x,
-        .y = worldSize.y,
-        .z = worldSize.z / resolution.y
-    };
+    setupVertices(mesh, terrainData, worldSize);
+    setupTriangles(mesh, terrainData);
+    setupTextureCoordinates(mesh, terrainData);
+    setupLighting(mesh, terrainData);
 
-    const Vector3 centerOffset {
-        .x = -(resolution.x - 1) * scale.x / 2.0f,
-        .y = 0.0f,
-        .z = -(resolution.y - 1) * scale.z / 2.0f
-    };
-
-    MeshWrapper meshWrapper {resolution};
-
-    for (uint32_t z = 0; z < terrainData.resolutionZ - 1; z++) {
-        for (uint32_t x = 0; x < terrainData.resolutionX - 1; x++) {
-            // 6 Vertices per quad
-            // A, C, B
-            // B, C, D
-            //
-            // A-----B
-            // |   / |
-            // | /   |
-            // C-----D
-
-            const Vector2 pointAIndex {.x = float(x), .y = float(z)};
-            const Vector3 pointA =
-                getPoint(pointAIndex, terrainData, scale, centerOffset);
-
-            const Vector2 pointBIndex {.x = float(x) + 1, .y = float(z)};
-            const Vector3 pointB =
-                getPoint(pointBIndex, terrainData, scale, centerOffset);
-
-            const Vector2 pointCIndex {.x = float(x), .y = float(z) + 1};
-            const Vector3 pointC =
-                getPoint(pointCIndex, terrainData, scale, centerOffset);
-
-            const Vector2 pointDIndex {
-                .x = float(x) + 1, .y = float(z) + 1
-            };
-            const Vector3 pointD =
-                getPoint(pointDIndex, terrainData, scale, centerOffset);
-
-            meshWrapper.addTriangle(pointA, pointC, pointB);
-            meshWrapper.addTextureTriangle(
-                pointAIndex, pointCIndex, pointBIndex, resolution
-            );
-
-            meshWrapper.addTriangle(pointB, pointC, pointD);
-            meshWrapper.addTextureTriangle(
-                pointBIndex, pointCIndex, pointDIndex, resolution
-            );
-        }
-    }
-
-    return meshWrapper.getMesh();
+    return mesh;
 }
 
 void MeshGenerator::updateMesh(
@@ -93,56 +146,6 @@ void MeshGenerator::updateMesh(
     const TerrainData& terrainData,
     const Vector3& worldSize
 ) {
-    const Vector3 scale {.x = 1, .y = worldSize.y, .z = 1};
-    const Vector3 offset {.x = 0, .y = 0, .z = 0};
-
-    uint32_t vertexIndex = 0;
-    for (uint32_t z = 0; z < terrainData.resolutionZ - 1; z++) {
-        for (uint32_t x = 0; x < terrainData.resolutionX - 1; x++) {
-            // 6 Vertices per quad
-            // A, C, B
-            // B, C, D
-            //
-            // A-----B
-            // |   / |
-            // | /   |
-            // C-----D
-
-            const Vector2 pointAIndex {.x = float(x), .y = float(z)};
-            const Vector3 pointA =
-                getPoint(pointAIndex, terrainData, scale, offset);
-
-            const Vector2 pointBIndex {.x = float(x) + 1, .y = float(z)};
-            const Vector3 pointB =
-                getPoint(pointBIndex, terrainData, scale, offset);
-
-            const Vector2 pointCIndex {.x = float(x), .y = float(z) + 1};
-            const Vector3 pointC =
-                getPoint(pointCIndex, terrainData, scale, offset);
-
-            const Vector2 pointDIndex {
-                .x = float(x) + 1, .y = float(z) + 1
-            };
-            const Vector3 pointD =
-                getPoint(pointDIndex, terrainData, scale, offset);
-
-            mesh.vertices[vertexIndex + 1] = pointA.y;
-            vertexIndex += 3;
-
-            mesh.vertices[vertexIndex + 1] = pointC.y;
-            vertexIndex += 3;
-
-            mesh.vertices[vertexIndex + 1] = pointB.y;
-            vertexIndex += 3;
-
-            mesh.vertices[vertexIndex + 1] = pointB.y;
-            vertexIndex += 3;
-
-            mesh.vertices[vertexIndex + 1] = pointC.y;
-            vertexIndex += 3;
-
-            mesh.vertices[vertexIndex + 1] = pointD.y;
-            vertexIndex += 3;
-        }
-    }
+    // updateVertices(mesh, terrainData);
+    // updateLighting(mesh, terrainData);
 }

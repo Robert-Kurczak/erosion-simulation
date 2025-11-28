@@ -13,6 +13,18 @@ private:
         const Vector3& offset
     );
 
+    void setupVertices(
+        Mesh& mesh,
+        const TerrainData& data,
+        const Vector3& worldSize
+    );
+    void setupTriangles(Mesh& mesh, const TerrainData& data);
+    void setupTextureCoordinates(Mesh& mesh, const TerrainData& data);
+    void setupLighting(Mesh& mesh, const TerrainData& data);
+
+    void updateVertices(Mesh& mesh, const TerrainData& data);
+    void updateLighting(Mesh& mesh, const TerrainData& data);
+
 public:
     virtual Mesh generateMesh(
         const TerrainData& terrainData,

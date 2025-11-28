@@ -25,9 +25,9 @@ void TerrainScene::setupTerrain() {
     TerrainModelConfig terrainModelConfig {
         .worldSize =
             Vector3 {
-                     .x = 128,
+                     .x = 120,
                      .y = 64,
-                     .z = 128,
+                     .z = 120,
                      },
         .worldPosition = Vector3 {.x = 0, .y = 0, .z = 0}
     };

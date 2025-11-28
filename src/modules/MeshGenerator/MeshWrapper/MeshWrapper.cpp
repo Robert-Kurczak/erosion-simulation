@@ -2,6 +2,17 @@
 
 #include <raymath.h>
 
+Vector3 MeshWrapper::computeNormal(
+    const Vector3& point,
+    const Vector3& leftNeighbor,
+    const Vector3& rightNeighbor
+) {
+    Vector3 leftVector = Vector3Subtract(leftNeighbor, point);
+    Vector3 rightVector = Vector3Subtract(rightNeighbor, point);
+
+    return Vector3Normalize(Vector3CrossProduct(leftVector, rightVector));
+}
+
 MeshWrapper::MeshWrapper(const Vector2& resolution) {
     const uint32_t squareCount = (resolution.x - 1) * (resolution.y - 1);
     const uint32_t triangleCount = squareCount * 2;
@@ -74,35 +85,6 @@ void MeshWrapper::addTriangle(
     addVertex(pointA);
     addVertex(pointB);
     addVertex(pointC);
-
-    const Vector3 vectorAB = Vector3Subtract(pointB, pointA);
-    const Vector3 vectorAC = Vector3Subtract(pointC, pointA);
-    const Vector3 normal =
-        Vector3Normalize(Vector3CrossProduct(vectorAB, vectorAC));
-
-    const Vector3 lightPosition {0, 45, 0};
-
-    const Vector3 pointALight =
-        Vector3Normalize(Vector3Subtract(lightPosition, pointA));
-    const Vector3 pointBLight =
-        Vector3Normalize(Vector3Subtract(lightPosition, pointB));
-    const Vector3 pointCLight =
-        Vector3Normalize(Vector3Subtract(lightPosition, pointC));
-
-    const float dotA =
-        Clamp(Vector3DotProduct(pointALight, normal), 0.0f, 1.0f);
-    const float dotB =
-        Clamp(Vector3DotProduct(pointBLight, normal), 0.0f, 1.0f);
-    const float dotC =
-        Clamp(Vector3DotProduct(pointCLight, normal), 0.0f, 1.0f);
-
-    const uint8_t pointAIntensity = uint8_t(dotA * 255);
-    const uint8_t pointBIntensity = uint8_t(dotB * 255);
-    const uint8_t pointCIntensity = uint8_t(dotC * 255);
-
-    addColor({pointAIntensity, pointAIntensity, pointAIntensity, 255});
-    addColor({pointBIntensity, pointBIntensity, pointBIntensity, 255});
-    addColor({pointCIntensity, pointCIntensity, pointCIntensity, 255});
 }
 
 void MeshWrapper::addTextureTriangle(
@@ -114,6 +96,25 @@ void MeshWrapper::addTextureTriangle(
     addTextureCoords(pointAIndex, resolution);
     addTextureCoords(pointBIndex, resolution);
     addTextureCoords(pointCIndex, resolution);
+}
+
+void MeshWrapper::addLighting(
+    const TerrainData& terrainData,
+    const Vector3& lightPosition
+) {
+    // const Vector3 normalA = computeNormal(pointA, pointB, pointC);
+
+    // addNormal(normalA);
+
+    // const Vector3 pointALight =
+    //     Vector3Normalize(Vector3Subtract(lightPosition, pointA));
+
+    // const float dotA =
+    //     Clamp(Vector3DotProduct(pointALight, normalA), 0.0f, 1.0f);
+
+    // const uint8_t pointAIntensity = uint8_t(dotA * 255);
+
+    // addColor({pointAIntensity, pointAIntensity, pointAIntensity, 255});
 }
 
 Mesh& MeshWrapper::getMesh() {
