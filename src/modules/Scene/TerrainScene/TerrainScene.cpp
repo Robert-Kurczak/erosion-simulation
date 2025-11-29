@@ -13,8 +13,8 @@ void TerrainScene::setupCamera() {
 }
 
 void TerrainScene::setupTerrain() {
-    const uint32_t resolutionX = 100;
-    const uint32_t resolutionZ = 100;
+    const uint32_t resolutionX = 1000;
+    const uint32_t resolutionZ = 1000;
     const float featureSize = 1.0f;
     const uint32_t seed = 20;
 

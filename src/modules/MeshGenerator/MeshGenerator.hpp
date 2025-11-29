@@ -11,6 +11,15 @@ private:
     static constexpr uint8_t COORDS_PER_TEXTURE = 2;
     static constexpr uint8_t CHANNELS_PER_COLOR = 4;
 
+    uint8_t calculateLightIntensity(
+        uint32_t xIndex,
+        uint32_t zIndex,
+        const TerrainData& data,
+        const Vector3& worldSize,
+        const Vector3& lightPosition,
+        const Vector3& point
+    );
+
     void setupMesh(
         Mesh& mesh,
         const TerrainData& data,
@@ -35,6 +44,8 @@ private:
     void addLighting(
         Mesh& mesh,
         const TerrainData& data,
+        const Vector3& worldSize,
+        const Vector3& lightPosition,
         uint32_t startQuad,
         uint32_t endQuad
     );
