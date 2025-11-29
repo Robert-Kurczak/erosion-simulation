@@ -1,52 +1,33 @@
 #include "MeshGenerator.hpp"
 
-#include "MeshWrapper/MeshWrapper.hpp"
-
-#include <cmath>
-#include <cstring>
-#include <iostream>
 #include <raymath.h>
 
-void MeshGenerator::setupVertices(
+void MeshGenerator::setupMesh(
     Mesh& mesh,
     const TerrainData& data,
-    const Vector3& worldSize
+    uint32_t totalQuadsNumber
 ) {
-    const uint8_t coordsPerVertex = 3;
-    const uint32_t vertexCount = data.heightMap.size();
+    mesh.vertexCount = totalQuadsNumber * VERTICES_PER_QUAD;
+    mesh.vertices = (float*) MemAlloc(
+        mesh.vertexCount * COORDS_PER_VERTEX * sizeof(float)
+    );
 
-    const Vector3 scale {
-        worldSize.x / (data.resolutionX - 1),
-        worldSize.y,
-        worldSize.z / (data.resolutionZ - 1)
-    };
+    mesh.texcoords = (float*) MemAlloc(
+        mesh.vertexCount * COORDS_PER_TEXTURE * sizeof(float)
+    );
 
-    const Vector3 offset {
-        -float(data.resolutionX - 1) / 2.0f,
-        0.0f,
-        -float(data.resolutionZ - 1) / 2.0f
-    };
-
-    mesh.vertexCount = vertexCount;
-    mesh.vertices =
-        (float*) MemAlloc(vertexCount * coordsPerVertex * sizeof(float));
-
-    uint32_t vertexIndex = 0;
-    for (uint32_t z = 0; z < data.resolutionZ; z++) {
-        for (uint32_t x = 0; x < data.resolutionX; x++) {
-            mesh.vertices[vertexIndex + 0] =
-                (float(x) + offset.x) * scale.x;
-            mesh.vertices[vertexIndex + 1] =
-                (float(data.heightAt(x, z)) + offset.y) * scale.y;
-            mesh.vertices[vertexIndex + 2] =
-                (float(z) + offset.z) * scale.z;
-
-            vertexIndex += 3;
-        }
-    }
+    mesh.colors = (uint8_t*) MemAlloc(
+        mesh.vertexCount * CHANNELS_PER_COLOR * sizeof(uint8_t)
+    );
 }
 
-void MeshGenerator::setupTriangles(Mesh& mesh, const TerrainData& data) {
+void MeshGenerator::addTriangles(
+    Mesh& mesh,
+    const TerrainData& data,
+    const Vector3& worldSize,
+    uint32_t startQuad,
+    uint32_t endQuad
+) {
     // A-----B
     // |   / |
     // | /   |
@@ -55,77 +36,219 @@ void MeshGenerator::setupTriangles(Mesh& mesh, const TerrainData& data) {
     // CounterClockwise
     // A, C, B
     // B, C, D
-    const uint32_t squareCount =
-        (data.resolutionX - 1) * (data.resolutionZ - 1);
 
-    const uint32_t triangleCount = squareCount * 2;
+    const Vector3 scale {
+        worldSize.x / (data.resolutionX - 1),
+        worldSize.y,
+        worldSize.z / (data.resolutionZ - 1)
+    };
 
-    mesh.triangleCount = triangleCount;
-    mesh.indices =
-        (uint16_t*) MemAlloc(triangleCount * 3 * sizeof(uint16_t));
+    const Vector3 offset {
+        -(float(data.resolutionX) - 1) / 2.0f,
+        0.0f,
+        -(float(data.resolutionZ) - 1) / 2.0f
+    };
 
-    uint16_t triangleIndex = 0;
-    for (uint32_t z = 0; z < data.resolutionZ - 1; z++) {
-        for (uint32_t x = 0; x < data.resolutionX - 1; x++) {
-            const uint32_t vertexAIndex = x + data.resolutionX * z;
-            const uint32_t vertexBIndex = (x + 1) + data.resolutionX * z;
-            const uint32_t vertexCIndex = x + data.resolutionX * (z + 1);
-            const uint32_t vertexDIndex =
-                (x + 1) + data.resolutionX * (z + 1);
+    const uint32_t quadsPerRow = data.resolutionX - 1;
 
-            mesh.indices[triangleIndex + 0] = vertexAIndex;
-            mesh.indices[triangleIndex + 1] = vertexCIndex;
-            mesh.indices[triangleIndex + 2] = vertexBIndex;
+    uint32_t vertexIndex =
+        startQuad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
 
-            triangleIndex += 3;
+    for (uint32_t quad = startQuad; quad < endQuad; quad++) {
+        const uint32_t x = quad % quadsPerRow;
+        const uint32_t z = quad / quadsPerRow;
 
-            mesh.indices[triangleIndex + 0] = vertexBIndex;
-            mesh.indices[triangleIndex + 1] = vertexCIndex;
-            mesh.indices[triangleIndex + 2] = vertexDIndex;
+        // A
+        mesh.vertices[vertexIndex + 0] = (float(x) + offset.x) * scale.x;
+        mesh.vertices[vertexIndex + 1] =
+            (float(data.heightAt(x, z)) + offset.y) * scale.y;
+        mesh.vertices[vertexIndex + 2] = (float(z) + offset.z) * scale.z;
 
-            triangleIndex += 3;
-        }
+        vertexIndex += 3;
+
+        // C
+        mesh.vertices[vertexIndex + 0] = (float(x) + offset.x) * scale.x;
+        mesh.vertices[vertexIndex + 1] =
+            (float(data.heightAt(x, z + 1)) + offset.y) * scale.y;
+        mesh.vertices[vertexIndex + 2] =
+            (float(z + 1) + offset.z) * scale.z;
+
+        vertexIndex += 3;
+
+        // B
+        mesh.vertices[vertexIndex + 0] =
+            (float(x + 1) + offset.x) * scale.x;
+        mesh.vertices[vertexIndex + 1] =
+            (float(data.heightAt(x + 1, z)) + offset.y) * scale.y;
+        mesh.vertices[vertexIndex + 2] = (float(z) + offset.z) * scale.z;
+
+        vertexIndex += 3;
+
+        // B
+        mesh.vertices[vertexIndex + 0] =
+            (float(x + 1) + offset.x) * scale.x;
+        mesh.vertices[vertexIndex + 1] =
+            (float(data.heightAt(x + 1, z)) + offset.y) * scale.y;
+        mesh.vertices[vertexIndex + 2] = (float(z) + offset.z) * scale.z;
+
+        vertexIndex += 3;
+
+        // C
+        mesh.vertices[vertexIndex + 0] = (float(x) + offset.x) * scale.x;
+        mesh.vertices[vertexIndex + 1] =
+            (float(data.heightAt(x, z + 1)) + offset.y) * scale.y;
+        mesh.vertices[vertexIndex + 2] =
+            (float(z + 1) + offset.z) * scale.z;
+
+        vertexIndex += 3;
+
+        // D
+        mesh.vertices[vertexIndex + 0] =
+            (float(x + 1) + offset.x) * scale.x;
+        mesh.vertices[vertexIndex + 1] =
+            (float(data.heightAt(x + 1, z + 1)) + offset.y) * scale.y;
+        mesh.vertices[vertexIndex + 2] =
+            (float(z + 1) + offset.z) * scale.z;
+
+        vertexIndex += 3;
     }
 }
 
-void MeshGenerator::setupTextureCoordinates(
+void MeshGenerator::addTextureCoords(
     Mesh& mesh,
-    const TerrainData& data
+    const TerrainData& data,
+    uint32_t startQuad,
+    uint32_t endQuad
 ) {
-    const uint32_t vertexCount = data.heightMap.size();
-    const uint8_t coordsPerTexture = 2;
+    const uint32_t quadsPerRow = data.resolutionX - 1;
 
-    mesh.texcoords =
-        (float*) MemAlloc(vertexCount * coordsPerTexture * sizeof(float));
+    uint32_t coordIndex =
+        startQuad * VERTICES_PER_QUAD * COORDS_PER_TEXTURE;
 
-    uint32_t textCoordIndex = 0;
-    for (uint32_t z = 0; z < data.resolutionZ; z++) {
-        for (uint32_t x = 0; x < data.resolutionX; x++) {
-            const float xCoord = float(x) / float(data.resolutionX - 1);
-            const float yCoord = float(z) / float(data.resolutionZ - 1);
+    for (uint32_t quad = startQuad; quad < endQuad; quad++) {
+        const uint32_t x = quad % quadsPerRow;
+        const uint32_t z = quad / quadsPerRow;
 
-            mesh.texcoords[textCoordIndex + 0] = xCoord;
-            mesh.texcoords[textCoordIndex + 1] = yCoord;
+        // A
+        mesh.texcoords[coordIndex + 0] =
+            float(x) / float(data.resolutionX - 1);
+        mesh.texcoords[coordIndex + 1] =
+            float(z) / float(data.resolutionZ - 1);
 
-            textCoordIndex += 2;
-        }
+        coordIndex += 2;
+
+        // C
+        mesh.texcoords[coordIndex + 0] =
+            float(x) / float(data.resolutionX - 1);
+        mesh.texcoords[coordIndex + 1] =
+            float(z + 1) / float(data.resolutionZ - 1);
+
+        coordIndex += 2;
+
+        // B
+        mesh.texcoords[coordIndex + 0] =
+            float(x + 1) / float(data.resolutionX - 1);
+        mesh.texcoords[coordIndex + 1] =
+            float(z) / float(data.resolutionZ - 1);
+
+        coordIndex += 2;
+
+        // B
+        mesh.texcoords[coordIndex + 0] =
+            float(x + 1) / float(data.resolutionX - 1);
+        mesh.texcoords[coordIndex + 1] =
+            float(z) / float(data.resolutionZ - 1);
+
+        coordIndex += 2;
+
+        // C
+        mesh.texcoords[coordIndex + 0] =
+            float(x) / float(data.resolutionX - 1);
+        mesh.texcoords[coordIndex + 1] =
+            float(z + 1) / float(data.resolutionZ - 1);
+
+        coordIndex += 2;
+
+        // D
+        mesh.texcoords[coordIndex + 0] =
+            float(x + 1) / float(data.resolutionX - 1);
+        mesh.texcoords[coordIndex + 1] =
+            float(z + 1) / float(data.resolutionZ - 1);
+
+        coordIndex += 2;
     }
 }
 
-void MeshGenerator::setupLighting(Mesh& mesh, const TerrainData& data) {}
+void MeshGenerator::addLighting(
+    Mesh& mesh,
+    const TerrainData& data,
+    uint32_t startQuad,
+    uint32_t endQuad
+) {
+    const uint32_t quadsPerRow = data.resolutionX - 1;
 
-void MeshGenerator::updateVertices(Mesh& mesh, const TerrainData& data) {
-    uint32_t vertexIndex = 0;
-    for (uint32_t z = 0; z < data.resolutionZ; z++) {
-        for (uint32_t x = 0; x < data.resolutionX; x++) {
-            mesh.vertices[vertexIndex + 1] = data.heightAt(x, z);
+    uint32_t colorIndex =
+        startQuad * VERTICES_PER_QUAD * CHANNELS_PER_COLOR;
 
-            vertexIndex += 3;
-        }
+    for (uint32_t quad = startQuad; quad < endQuad; quad++) {
+        const uint32_t x = quad % quadsPerRow;
+        const uint32_t z = quad / quadsPerRow;
+
+        // A
+        uint8_t colorIntensity = 255;
+        mesh.colors[colorIndex + 0] = colorIntensity;
+        mesh.colors[colorIndex + 1] = colorIntensity;
+        mesh.colors[colorIndex + 2] = colorIntensity;
+        mesh.colors[colorIndex + 3] = 255;
+
+        colorIndex += 4;
+
+        // C
+        colorIntensity = 255;
+        mesh.colors[colorIndex + 0] = colorIntensity;
+        mesh.colors[colorIndex + 1] = colorIntensity;
+        mesh.colors[colorIndex + 2] = colorIntensity;
+        mesh.colors[colorIndex + 3] = 255;
+
+        colorIndex += 4;
+
+        // B
+        colorIntensity = 255;
+        mesh.colors[colorIndex + 0] = colorIntensity;
+        mesh.colors[colorIndex + 1] = colorIntensity;
+        mesh.colors[colorIndex + 2] = colorIntensity;
+        mesh.colors[colorIndex + 3] = 255;
+
+        colorIndex += 4;
+
+        // B
+        colorIntensity = 255;
+        mesh.colors[colorIndex + 0] = colorIntensity;
+        mesh.colors[colorIndex + 1] = colorIntensity;
+        mesh.colors[colorIndex + 2] = colorIntensity;
+        mesh.colors[colorIndex + 3] = 255;
+
+        colorIndex += 4;
+
+        // C
+        colorIntensity = 255;
+        mesh.colors[colorIndex + 0] = colorIntensity;
+        mesh.colors[colorIndex + 1] = colorIntensity;
+        mesh.colors[colorIndex + 2] = colorIntensity;
+        mesh.colors[colorIndex + 3] = 255;
+
+        colorIndex += 4;
+
+        // D
+        colorIntensity = 255;
+        mesh.colors[colorIndex + 0] = colorIntensity;
+        mesh.colors[colorIndex + 1] = colorIntensity;
+        mesh.colors[colorIndex + 2] = colorIntensity;
+        mesh.colors[colorIndex + 3] = 255;
+
+        colorIndex += 4;
     }
 }
-
-void MeshGenerator::updateLighting(Mesh& mesh, const TerrainData& data) {}
 
 Mesh MeshGenerator::generateMesh(
     const TerrainData& terrainData,
@@ -133,10 +256,14 @@ Mesh MeshGenerator::generateMesh(
 ) {
     Mesh mesh {};
 
-    setupVertices(mesh, terrainData, worldSize);
-    setupTriangles(mesh, terrainData);
-    setupTextureCoordinates(mesh, terrainData);
-    setupLighting(mesh, terrainData);
+    const uint32_t totalQuadsNumber =
+        (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
+
+    setupMesh(mesh, terrainData, totalQuadsNumber);
+
+    addTriangles(mesh, terrainData, worldSize, 0, totalQuadsNumber);
+    addTextureCoords(mesh, terrainData, 0, totalQuadsNumber);
+    addLighting(mesh, terrainData, 0, totalQuadsNumber);
 
     return mesh;
 }

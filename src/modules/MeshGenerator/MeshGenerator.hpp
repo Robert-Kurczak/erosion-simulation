@@ -6,24 +6,38 @@
 
 class MeshGenerator : public IMeshGenerator {
 private:
-    Vector3 getPoint(
-        const Vector2& index,
-        const TerrainData& terrainData,
-        const Vector3& scale,
-        const Vector3& offset
-    );
+    static constexpr uint8_t VERTICES_PER_QUAD = 6;
+    static constexpr uint8_t COORDS_PER_VERTEX = 3;
+    static constexpr uint8_t COORDS_PER_TEXTURE = 2;
+    static constexpr uint8_t CHANNELS_PER_COLOR = 4;
 
-    void setupVertices(
+    void setupMesh(
         Mesh& mesh,
         const TerrainData& data,
-        const Vector3& worldSize
+        uint32_t totalQuadsNumber
     );
-    void setupTriangles(Mesh& mesh, const TerrainData& data);
-    void setupTextureCoordinates(Mesh& mesh, const TerrainData& data);
-    void setupLighting(Mesh& mesh, const TerrainData& data);
 
-    void updateVertices(Mesh& mesh, const TerrainData& data);
-    void updateLighting(Mesh& mesh, const TerrainData& data);
+    void addTriangles(
+        Mesh& mesh,
+        const TerrainData& data,
+        const Vector3& worldSize,
+        uint32_t startQuad,
+        uint32_t endQuad
+    );
+
+    void addTextureCoords(
+        Mesh& mesh,
+        const TerrainData& data,
+        uint32_t startQuad,
+        uint32_t endQuad
+    );
+
+    void addLighting(
+        Mesh& mesh,
+        const TerrainData& data,
+        uint32_t startQuad,
+        uint32_t endQuad
+    );
 
 public:
     virtual Mesh generateMesh(
