@@ -1,37 +1,32 @@
 #include "PerlinNoiseTerrainGenerator.hpp"
 
-#include <raylib.h>
-
 std::vector<double> PerlinNoiseTerrainGenerator::
-    createNormalizedHeightMap(const Image& heightMapImage) {
-    const uint8_t channelsPerPixel = 4;
+    createNormalizedHeightMap(
+        const FastNoiseLite& noiseGenerator,
+        uint32_t resolutionX,
+        uint32_t resolutionZ
+    ) {
+    std::vector<double> heightMap(resolutionX * resolutionZ);
 
-    const size_t pixelsInImage =
-        heightMapImage.width * heightMapImage.height;
+    uint32_t index = 0;
+    for (uint32_t y = 0; y < resolutionZ; y++) {
+        for (uint32_t x = 0; x < resolutionX; x++) {
+            heightMap[index] =
+                (noiseGenerator.GetNoise(float(x), float(y)) + 1.0f) /
+                2.0f;
 
-    const uint8_t* pixels = static_cast<uint8_t*>(heightMapImage.data);
-
-    std::vector<double> heightMap(pixelsInImage);
-
-    for (size_t pixelIndex = 0; pixelIndex < pixelsInImage;
-         pixelIndex++) {
-        const double height =
-            pixels[pixelIndex * channelsPerPixel] / 255.0f;
-
-        heightMap[pixelIndex] = height;
+            index++;
+        }
     }
 
     return heightMap;
 }
 
 std::vector<Color> PerlinNoiseTerrainGenerator::createInitialColorMap(
-    const Image& heightMapImage
+    uint32_t resolutionX,
+    uint32_t resolutionZ
 ) {
-    const size_t pixelsInImage =
-        heightMapImage.width * heightMapImage.height;
-
-    const std::vector<Color> colorMap(pixelsInImage, RED);
-
+    const std::vector<Color> colorMap(resolutionX * resolutionZ, RED);
     return colorMap;
 }
 
@@ -41,19 +36,22 @@ TerrainData PerlinNoiseTerrainGenerator::generateTerrain(
     float featureSize,
     uint32_t seed
 ) {
-    const Image perlinImage = GenImagePerlinNoise(
-        resolutionX,
-        resolutionZ,
-        resolutionX * (seed % 256),
-        resolutionZ * (seed % 512),
-        featureSize
-    );
+    FastNoiseLite noiseGenerator;
+    noiseGenerator.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noiseGenerator.SetFractalType(FastNoiseLite::FractalType_FBm);
+    noiseGenerator.SetSeed(seed);
+    noiseGenerator.SetFractalLacunarity(1.85f);
+    noiseGenerator.SetFractalOctaves(6);
+    noiseGenerator.SetFractalGain(0.4f);
+    noiseGenerator.SetFrequency(0.8f / float(resolutionX));
 
-    TerrainData terrainData {
+    const TerrainData terrainData {
         .resolutionX = resolutionX,
         .resolutionZ = resolutionZ,
-        .heightMap = createNormalizedHeightMap(perlinImage),
-        .colorMap = createInitialColorMap(perlinImage)
+        .heightMap = createNormalizedHeightMap(
+            noiseGenerator, resolutionX, resolutionZ
+        ),
+        .colorMap = createInitialColorMap(resolutionX, resolutionZ)
     };
 
     return terrainData;

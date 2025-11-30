@@ -1,6 +1,7 @@
 FROM debian:trixie-slim
 
 RUN apt-get update && apt-get upgrade && apt-get install -y \
+    curl \
     build-essential \
     clang \
     clang-format \
@@ -26,3 +27,7 @@ RUN git clone https://github.com/raysan5/raylib.git $RAYLIB_SOURCE_PATH && \
     make && \
     make install && \
     ldconfig
+
+RUN curl \
+    --output /usr/include/FastNoiseLite.h \
+    "https://raw.githubusercontent.com/Auburn/FastNoiseLite/refs/heads/master/Cpp/FastNoiseLite.h"

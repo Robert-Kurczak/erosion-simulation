@@ -2,13 +2,20 @@
 
 #include "../ITerrainGenerator.hpp"
 
+#include <FastNoiseLite.h>
+
 class PerlinNoiseTerrainGenerator : public ITerrainGenerator {
 private:
     std::vector<double> createNormalizedHeightMap(
-        const Image& heightMapImage
+        const FastNoiseLite& noiseGenerator,
+        uint32_t resolutionX,
+        uint32_t resolutionZ
     );
 
-    std::vector<Color> createInitialColorMap(const Image& heightMapImage);
+    std::vector<Color> createInitialColorMap(
+        uint32_t resolutionX,
+        uint32_t resolutionZ
+    );
 
 public:
     virtual TerrainData generateTerrain(
