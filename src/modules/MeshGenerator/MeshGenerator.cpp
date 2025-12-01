@@ -1,8 +1,8 @@
 #include "MeshGenerator.hpp"
 
+#include <algorithm>
+#include <iostream>
 #include <raymath.h>
-
-// 18 FPS
 
 inline Vector3 MeshGenerator::getWorldPoint(
     uint32_t xIndex,
@@ -35,10 +35,10 @@ inline Vector3 MeshGenerator::getVertexFromQuad(
     uint32_t vertexIndexInQuad
 ) {
     const uint8_t vertexCoordIndexInQuad =
-        vertexIndexInQuad * COORDS_PER_VERTEX;
+        vertexIndexInQuad * COORDS_PER_VERTEX_;
 
     const uint32_t vertexOffset =
-        quadIndex * VERTICES_PER_QUAD * COORDS_PER_VERTEX +
+        quadIndex * VERTICES_PER_QUAD_ * COORDS_PER_VERTEX_ +
         vertexCoordIndexInQuad;
 
     return Vector3 {
@@ -127,17 +127,17 @@ inline Color MeshGenerator::calculateLightIntensity(
 }
 
 void MeshGenerator::setupMesh(Mesh& mesh, uint32_t totalQuadsNumber) {
-    mesh.vertexCount = totalQuadsNumber * VERTICES_PER_QUAD;
+    mesh.vertexCount = totalQuadsNumber * VERTICES_PER_QUAD_;
     mesh.vertices = (float*) MemAlloc(
-        mesh.vertexCount * COORDS_PER_VERTEX * sizeof(float)
+        mesh.vertexCount * COORDS_PER_VERTEX_ * sizeof(float)
     );
 
     mesh.texcoords = (float*) MemAlloc(
-        mesh.vertexCount * COORDS_PER_TEXTURE * sizeof(float)
+        mesh.vertexCount * COORDS_PER_TEXTURE_ * sizeof(float)
     );
 
     mesh.colors = (uint8_t*) MemAlloc(
-        mesh.vertexCount * CHANNELS_PER_COLOR * sizeof(uint8_t)
+        mesh.vertexCount * CHANNELS_PER_COLOR_ * sizeof(uint8_t)
     );
 }
 
@@ -172,7 +172,7 @@ void MeshGenerator::addTriangles(
     const uint32_t quadsPerRow = data.resolutionX - 1;
 
     uint32_t vertexIndex =
-        startQuad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
+        startQuad * VERTICES_PER_QUAD_ * COORDS_PER_VERTEX_;
 
     for (uint32_t quad = startQuad; quad < endQuad; quad++) {
         const uint32_t x = quad % quadsPerRow;
@@ -187,22 +187,22 @@ void MeshGenerator::addTriangles(
             getWorldPoint(x + 1, z + 1, data, offset, scale);
 
         addVertex(mesh, vertexIndex, pointA);
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         addVertex(mesh, vertexIndex, pointC);
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         addVertex(mesh, vertexIndex, pointB);
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         addVertex(mesh, vertexIndex, pointB);
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         addVertex(mesh, vertexIndex, pointC);
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         addVertex(mesh, vertexIndex, pointD);
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
     }
 }
 
@@ -215,7 +215,7 @@ void MeshGenerator::addTextureCoords(
     const uint32_t quadsPerRow = data.resolutionX - 1;
 
     uint32_t coordIndex =
-        startQuad * VERTICES_PER_QUAD * COORDS_PER_TEXTURE;
+        startQuad * VERTICES_PER_QUAD_ * COORDS_PER_TEXTURE_;
 
     for (uint32_t quad = startQuad; quad < endQuad; quad++) {
         const uint32_t x = quad % quadsPerRow;
@@ -227,22 +227,22 @@ void MeshGenerator::addTextureCoords(
         const Vector2 coordsD = getTextureCoord(x + 1, z + 1, data);
 
         addTextureCoord(mesh, coordIndex, coordsA);
-        coordIndex += 2;
+        coordIndex += COORDS_PER_TEXTURE_;
 
         addTextureCoord(mesh, coordIndex, coordsC);
-        coordIndex += 2;
+        coordIndex += COORDS_PER_TEXTURE_;
 
         addTextureCoord(mesh, coordIndex, coordsB);
-        coordIndex += 2;
+        coordIndex += COORDS_PER_TEXTURE_;
 
         addTextureCoord(mesh, coordIndex, coordsB);
-        coordIndex += 2;
+        coordIndex += COORDS_PER_TEXTURE_;
 
         addTextureCoord(mesh, coordIndex, coordsC);
-        coordIndex += 2;
+        coordIndex += COORDS_PER_TEXTURE_;
 
         addTextureCoord(mesh, coordIndex, coordsD);
-        coordIndex += 2;
+        coordIndex += COORDS_PER_TEXTURE_;
     }
 }
 
@@ -257,7 +257,7 @@ void MeshGenerator::addLighting(
     const uint32_t quadsPerRow = data.resolutionX - 1;
 
     uint32_t colorIndex =
-        startQuad * VERTICES_PER_QUAD * CHANNELS_PER_COLOR;
+        startQuad * VERTICES_PER_QUAD_ * CHANNELS_PER_COLOR_;
 
     for (uint32_t quad = startQuad; quad < endQuad; quad++) {
         const uint32_t x = quad % quadsPerRow;
@@ -292,22 +292,22 @@ void MeshGenerator::addLighting(
         );
 
         addColor(mesh, colorIndex, vertexALight);
-        colorIndex += 4;
+        colorIndex += CHANNELS_PER_COLOR_;
 
         addColor(mesh, colorIndex, vertexCLight);
-        colorIndex += 4;
+        colorIndex += CHANNELS_PER_COLOR_;
 
         addColor(mesh, colorIndex, vertexBLight);
-        colorIndex += 4;
+        colorIndex += CHANNELS_PER_COLOR_;
 
         addColor(mesh, colorIndex, vertexBLight);
-        colorIndex += 4;
+        colorIndex += CHANNELS_PER_COLOR_;
 
         addColor(mesh, colorIndex, vertexCLight);
-        colorIndex += 4;
+        colorIndex += CHANNELS_PER_COLOR_;
 
         addColor(mesh, colorIndex, vertexDLight);
-        colorIndex += 4;
+        colorIndex += CHANNELS_PER_COLOR_;
     }
 }
 
@@ -321,7 +321,7 @@ void MeshGenerator::updateTrianglesHeight(
     const uint32_t quadsPerRow = data.resolutionX - 1;
 
     uint32_t vertexIndex =
-        startQuad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
+        startQuad * VERTICES_PER_QUAD_ * COORDS_PER_VERTEX_;
 
     for (uint32_t quad = startQuad; quad < endQuad; quad++) {
         const uint32_t x = quad % quadsPerRow;
@@ -334,23 +334,91 @@ void MeshGenerator::updateTrianglesHeight(
             data.heightAt(x + 1, z + 1) * worldSize.y;
 
         mesh.vertices[vertexIndex + 1] = pointAHeight;
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         mesh.vertices[vertexIndex + 1] = pointCHeight;
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         mesh.vertices[vertexIndex + 1] = pointBHeight;
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         mesh.vertices[vertexIndex + 1] = pointBHeight;
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         mesh.vertices[vertexIndex + 1] = pointCHeight;
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
 
         mesh.vertices[vertexIndex + 1] = pointDHeight;
-        vertexIndex += 3;
+        vertexIndex += COORDS_PER_VERTEX_;
     }
+}
+
+std::thread MeshGenerator::createGeneratorThread(
+    Mesh& mesh,
+    const TerrainData& terrainData,
+    const Vector3& worldSize,
+    const Vector3& lightPosition,
+    uint32_t startQuad,
+    uint32_t endQuad
+) {
+    return std::thread {([this,
+                          &mesh,
+                          &terrainData,
+                          &worldSize,
+                          &lightPosition,
+                          startQuad,
+                          endQuad]() mutable {
+        addTriangles(mesh, terrainData, worldSize, startQuad, endQuad);
+
+        addTextureCoords(mesh, terrainData, startQuad, endQuad);
+
+        addLighting(
+            mesh,
+            terrainData,
+            worldSize,
+            lightPosition,
+            startQuad,
+            endQuad
+        );
+    })};
+}
+
+std::thread MeshGenerator::createUpdaterThread(
+    Mesh& mesh,
+    const TerrainData& terrainData,
+    const Vector3& worldSize,
+    const Vector3& lightPosition,
+    uint32_t startQuad,
+    uint32_t endQuad
+) {
+    return std::thread {([this,
+                          &mesh,
+                          &terrainData,
+                          &worldSize,
+                          &lightPosition,
+                          startQuad,
+                          endQuad]() mutable {
+        updateTrianglesHeight(
+            mesh, terrainData, worldSize, startQuad, endQuad
+        );
+
+        addLighting(
+            mesh,
+            terrainData,
+            worldSize,
+            lightPosition,
+            startQuad,
+            endQuad
+        );
+    })};
+}
+
+MeshGenerator::MeshGenerator() :
+    threads_amount_(std::max(2u, std::thread::hardware_concurrency())) {
+    generatorThreads_.resize(threads_amount_);
+    updaterThreads_.resize(threads_amount_);
+
+    std::cout << "Threads in Mesh Generator: " << threads_amount_ << "\n";
 }
 
 Mesh MeshGenerator::generateIlluminatedMesh(
@@ -363,13 +431,36 @@ Mesh MeshGenerator::generateIlluminatedMesh(
     const uint32_t totalQuadsNumber =
         (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
 
+    const uint32_t quadsPerThread = totalQuadsNumber / threads_amount_;
+
     setupMesh(mesh, totalQuadsNumber);
 
-    addTriangles(mesh, terrainData, worldSize, 0, totalQuadsNumber);
-    addTextureCoords(mesh, terrainData, 0, totalQuadsNumber);
-    addLighting(
-        mesh, terrainData, worldSize, lightPosition, 0, totalQuadsNumber
+    for (uint8_t i = 0; i < generatorThreads_.size() - 1; i++) {
+        const uint32_t startQuad = i * quadsPerThread;
+        const uint32_t endQuad = startQuad + quadsPerThread;
+
+        generatorThreads_[i] = createGeneratorThread(
+            mesh,
+            terrainData,
+            worldSize,
+            lightPosition,
+            startQuad,
+            endQuad
+        );
+    }
+
+    const uint32_t startQuad =
+        (generatorThreads_.size() - 1) * quadsPerThread;
+
+    const uint32_t endQuad = totalQuadsNumber;
+
+    generatorThreads_.back() = createGeneratorThread(
+        mesh, terrainData, worldSize, lightPosition, startQuad, endQuad
     );
+
+    for (std::thread& thread : generatorThreads_) {
+        thread.join();
+    }
 
     return mesh;
 }
@@ -383,11 +474,32 @@ void MeshGenerator::updateIlluminatedMesh(
     const uint32_t totalQuadsNumber =
         (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
 
-    updateTrianglesHeight(
-        mesh, terrainData, worldSize, 0, totalQuadsNumber
+    const uint32_t quadsPerThread = totalQuadsNumber / threads_amount_;
+
+    for (uint8_t i = 0; i < threads_amount_ - 1; i++) {
+        const uint32_t startQuad = i * quadsPerThread;
+        const uint32_t endQuad = startQuad + quadsPerThread;
+
+        updaterThreads_[i] = createUpdaterThread(
+            mesh,
+            terrainData,
+            worldSize,
+            lightPosition,
+            startQuad,
+            endQuad
+        );
+    }
+
+    const uint32_t startQuad =
+        (updaterThreads_.size() - 1) * quadsPerThread;
+
+    const uint32_t endQuad = totalQuadsNumber;
+
+    updaterThreads_.back() = createUpdaterThread(
+        mesh, terrainData, worldSize, lightPosition, startQuad, endQuad
     );
 
-    addLighting(
-        mesh, terrainData, worldSize, lightPosition, 0, totalQuadsNumber
-    );
+    for (std::thread& thread : updaterThreads_) {
+        thread.join();
+    }
 }
