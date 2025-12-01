@@ -79,7 +79,15 @@ void TerrainRenderer::renderModel(
         terrainMesh_,
         0,
         terrainMesh_.vertices,
-        terrainMesh_.vertexCount,
+        terrainMesh_.vertexCount * 3 * sizeof(float),
+        0
+    );
+
+    UpdateMeshBuffer(
+        terrainMesh_,
+        2,
+        terrainMesh_.colors,
+        terrainMesh_.vertexCount * 4 * sizeof(uint8_t),
         0
     );
 

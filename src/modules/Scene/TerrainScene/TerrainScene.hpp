@@ -14,7 +14,7 @@ private:
 
     Camera3D mainCamera_ {};
     TerrainData terrainData_;
-    Vector3 lightSourcePosition_ {0, 45, 0};
+    Vector3 lightSourcePosition_ {0, 100, 0};
 
     void setupCamera();
     void setupTerrain();

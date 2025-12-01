@@ -5,8 +5,8 @@
 #include <cstring>
 
 void TerrainScene::setupCamera() {
-    mainCamera_.position = Vector3 {30.0f, 100.0f, 100.0f};
-    mainCamera_.target = Vector3 {0.0f, 0.0f, 0.0f};
+    mainCamera_.position = Vector3 {-50.0f, 120.0f, -150.0f};
+    mainCamera_.target = Vector3 {0.0f, 40.0f, 0.0f};
     mainCamera_.up = Vector3 {0.0f, 1.0f, 0.0f};
     mainCamera_.fovy = 45.0f;
     mainCamera_.projection = CAMERA_PERSPECTIVE;
@@ -23,9 +23,9 @@ void TerrainScene::setupTerrain() {
     TerrainModelConfig terrainModelConfig {
         .worldSize =
             Vector3 {
-                     .x = 128,
+                     .x = 256,
                      .y = 64,
-                     .z = 128,
+                     .z = 256,
                      },
         .worldPosition = Vector3 {.x = 0, .y = 0, .z = 0}
     };
