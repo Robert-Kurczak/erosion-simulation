@@ -15,12 +15,10 @@ void TerrainScene::setupCamera() {
 void TerrainScene::setupTerrain() {
     const uint32_t resolutionX = 1024;
     const uint32_t resolutionZ = 1024;
-    const float featureSize = 1.0f;
     const uint32_t seed = 20;
 
-    terrainData_ = terrainGenerator_.generateTerrain(
-        resolutionX, resolutionZ, featureSize, seed
-    );
+    terrainData_ =
+        terrainGenerator_.generateTerrain(resolutionX, resolutionZ, seed);
 
     TerrainModelConfig terrainModelConfig {
         .worldSize =

@@ -2,7 +2,83 @@
 
 #include <raymath.h>
 
-uint8_t MeshGenerator::calculateLightIntensity(
+// 18 FPS
+
+inline Vector3 MeshGenerator::getWorldPoint(
+    uint32_t xIndex,
+    uint32_t zIndex,
+    const TerrainData& data,
+    const Vector3& offset,
+    const Vector3& scale
+) const {
+    return Vector3 {
+        (float(xIndex) + offset.x) * scale.x,
+        float(data.heightAt(xIndex, zIndex) * scale.y),
+        (float(zIndex) + offset.z) * scale.z
+    };
+}
+
+inline Vector2 MeshGenerator::getTextureCoord(
+    uint32_t xIndex,
+    uint32_t zIndex,
+    const TerrainData& data
+) const {
+    return Vector2 {
+        float(xIndex) / float(data.resolutionX - 1),
+        float(zIndex) / float(data.resolutionZ - 1)
+    };
+}
+
+inline Vector3 MeshGenerator::getVertexFromQuad(
+    Mesh& mesh,
+    uint32_t quadIndex,
+    uint32_t vertexIndexInQuad
+) {
+    const uint8_t vertexCoordIndexInQuad =
+        vertexIndexInQuad * COORDS_PER_VERTEX;
+
+    const uint32_t vertexOffset =
+        quadIndex * VERTICES_PER_QUAD * COORDS_PER_VERTEX +
+        vertexCoordIndexInQuad;
+
+    return Vector3 {
+        mesh.vertices[vertexOffset + 0],
+        mesh.vertices[vertexOffset + 1],
+        mesh.vertices[vertexOffset + 2]
+    };
+}
+
+inline void MeshGenerator::addVertex(
+    Mesh& mesh,
+    uint32_t index,
+    const Vector3& coords
+) {
+    mesh.vertices[index + 0] = coords.x;
+    mesh.vertices[index + 1] = coords.y;
+    mesh.vertices[index + 2] = coords.z;
+}
+
+inline void MeshGenerator::addTextureCoord(
+    Mesh& mesh,
+    uint32_t index,
+    const Vector2& coords
+) {
+    mesh.texcoords[index + 0] = coords.x;
+    mesh.texcoords[index + 1] = coords.y;
+}
+
+inline void MeshGenerator::addColor(
+    Mesh& mesh,
+    uint32_t index,
+    const Color& color
+) {
+    mesh.colors[index + 0] = color.r;
+    mesh.colors[index + 1] = color.g;
+    mesh.colors[index + 2] = color.b;
+    mesh.colors[index + 3] = color.a;
+}
+
+inline Color MeshGenerator::calculateLightIntensity(
     uint32_t xIndex,
     uint32_t zIndex,
     const TerrainData& data,
@@ -45,14 +121,12 @@ uint8_t MeshGenerator::calculateLightIntensity(
     const float dotProduct =
         Clamp(Vector3DotProduct(lightVector, pointNormal), 0.0f, 1.0f);
 
-    return uint8_t(dotProduct * 255);
+    const uint8_t intensity = dotProduct * 255;
+
+    return Color {intensity, intensity, intensity, 255};
 }
 
-void MeshGenerator::setupMesh(
-    Mesh& mesh,
-    const TerrainData& data,
-    uint32_t totalQuadsNumber
-) {
+void MeshGenerator::setupMesh(Mesh& mesh, uint32_t totalQuadsNumber) {
     mesh.vertexCount = totalQuadsNumber * VERTICES_PER_QUAD;
     mesh.vertices = (float*) MemAlloc(
         mesh.vertexCount * COORDS_PER_VERTEX * sizeof(float)
@@ -104,58 +178,30 @@ void MeshGenerator::addTriangles(
         const uint32_t x = quad % quadsPerRow;
         const uint32_t z = quad / quadsPerRow;
 
-        // A
-        mesh.vertices[vertexIndex + 0] = (float(x) + offset.x) * scale.x;
-        mesh.vertices[vertexIndex + 1] =
-            (float(data.heightAt(x, z)) + offset.y) * scale.y;
-        mesh.vertices[vertexIndex + 2] = (float(z) + offset.z) * scale.z;
+        const Vector3 pointA = getWorldPoint(x, z, data, offset, scale);
+        const Vector3 pointB =
+            getWorldPoint(x + 1, z, data, offset, scale);
+        const Vector3 pointC =
+            getWorldPoint(x, z + 1, data, offset, scale);
+        const Vector3 pointD =
+            getWorldPoint(x + 1, z + 1, data, offset, scale);
 
+        addVertex(mesh, vertexIndex, pointA);
         vertexIndex += 3;
 
-        // C
-        mesh.vertices[vertexIndex + 0] = (float(x) + offset.x) * scale.x;
-        mesh.vertices[vertexIndex + 1] =
-            (float(data.heightAt(x, z + 1)) + offset.y) * scale.y;
-        mesh.vertices[vertexIndex + 2] =
-            (float(z + 1) + offset.z) * scale.z;
-
+        addVertex(mesh, vertexIndex, pointC);
         vertexIndex += 3;
 
-        // B
-        mesh.vertices[vertexIndex + 0] =
-            (float(x + 1) + offset.x) * scale.x;
-        mesh.vertices[vertexIndex + 1] =
-            (float(data.heightAt(x + 1, z)) + offset.y) * scale.y;
-        mesh.vertices[vertexIndex + 2] = (float(z) + offset.z) * scale.z;
-
+        addVertex(mesh, vertexIndex, pointB);
         vertexIndex += 3;
 
-        // B
-        mesh.vertices[vertexIndex + 0] =
-            (float(x + 1) + offset.x) * scale.x;
-        mesh.vertices[vertexIndex + 1] =
-            (float(data.heightAt(x + 1, z)) + offset.y) * scale.y;
-        mesh.vertices[vertexIndex + 2] = (float(z) + offset.z) * scale.z;
-
+        addVertex(mesh, vertexIndex, pointB);
         vertexIndex += 3;
 
-        // C
-        mesh.vertices[vertexIndex + 0] = (float(x) + offset.x) * scale.x;
-        mesh.vertices[vertexIndex + 1] =
-            (float(data.heightAt(x, z + 1)) + offset.y) * scale.y;
-        mesh.vertices[vertexIndex + 2] =
-            (float(z + 1) + offset.z) * scale.z;
-
+        addVertex(mesh, vertexIndex, pointC);
         vertexIndex += 3;
 
-        // D
-        mesh.vertices[vertexIndex + 0] =
-            (float(x + 1) + offset.x) * scale.x;
-        mesh.vertices[vertexIndex + 1] =
-            (float(data.heightAt(x + 1, z + 1)) + offset.y) * scale.y;
-        mesh.vertices[vertexIndex + 2] =
-            (float(z + 1) + offset.z) * scale.z;
-
+        addVertex(mesh, vertexIndex, pointD);
         vertexIndex += 3;
     }
 }
@@ -175,52 +221,27 @@ void MeshGenerator::addTextureCoords(
         const uint32_t x = quad % quadsPerRow;
         const uint32_t z = quad / quadsPerRow;
 
-        // A
-        mesh.texcoords[coordIndex + 0] =
-            float(x) / float(data.resolutionX - 1);
-        mesh.texcoords[coordIndex + 1] =
-            float(z) / float(data.resolutionZ - 1);
+        const Vector2 coordsA = getTextureCoord(x, z, data);
+        const Vector2 coordsB = getTextureCoord(x + 1, z, data);
+        const Vector2 coordsC = getTextureCoord(x, z + 1, data);
+        const Vector2 coordsD = getTextureCoord(x + 1, z + 1, data);
 
+        addTextureCoord(mesh, coordIndex, coordsA);
         coordIndex += 2;
 
-        // C
-        mesh.texcoords[coordIndex + 0] =
-            float(x) / float(data.resolutionX - 1);
-        mesh.texcoords[coordIndex + 1] =
-            float(z + 1) / float(data.resolutionZ - 1);
-
+        addTextureCoord(mesh, coordIndex, coordsC);
         coordIndex += 2;
 
-        // B
-        mesh.texcoords[coordIndex + 0] =
-            float(x + 1) / float(data.resolutionX - 1);
-        mesh.texcoords[coordIndex + 1] =
-            float(z) / float(data.resolutionZ - 1);
-
+        addTextureCoord(mesh, coordIndex, coordsB);
         coordIndex += 2;
 
-        // B
-        mesh.texcoords[coordIndex + 0] =
-            float(x + 1) / float(data.resolutionX - 1);
-        mesh.texcoords[coordIndex + 1] =
-            float(z) / float(data.resolutionZ - 1);
-
+        addTextureCoord(mesh, coordIndex, coordsB);
         coordIndex += 2;
 
-        // C
-        mesh.texcoords[coordIndex + 0] =
-            float(x) / float(data.resolutionX - 1);
-        mesh.texcoords[coordIndex + 1] =
-            float(z + 1) / float(data.resolutionZ - 1);
-
+        addTextureCoord(mesh, coordIndex, coordsC);
         coordIndex += 2;
 
-        // D
-        mesh.texcoords[coordIndex + 0] =
-            float(x + 1) / float(data.resolutionX - 1);
-        mesh.texcoords[coordIndex + 1] =
-            float(z + 1) / float(data.resolutionZ - 1);
-
+        addTextureCoord(mesh, coordIndex, coordsD);
         coordIndex += 2;
     }
 }
@@ -242,98 +263,50 @@ void MeshGenerator::addLighting(
         const uint32_t x = quad % quadsPerRow;
         const uint32_t z = quad / quadsPerRow;
 
-        uint32_t vertexIndex =
-            quad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
-        const Vector3 pointA {
-            mesh.vertices[vertexIndex + 0],
-            mesh.vertices[vertexIndex + 1],
-            mesh.vertices[vertexIndex + 2]
-        };
-        const uint8_t pointAIntensity = calculateLightIntensity(
-            x, z, data, worldSize, lightPosition, pointA
+        // A, C, B | B, C, D
+        const uint8_t vertexAIndexInQuad = 0;
+        const uint8_t vertexBIndexInQuad = 2;
+        const uint8_t vertexCIndexInQuad = 1;
+        const uint8_t vertexDIndexInQuad = 5;
+
+        const Vector3 vertexA =
+            getVertexFromQuad(mesh, quad, vertexAIndexInQuad);
+        const Vector3 vertexB =
+            getVertexFromQuad(mesh, quad, vertexBIndexInQuad);
+        const Vector3 vertexC =
+            getVertexFromQuad(mesh, quad, vertexCIndexInQuad);
+        const Vector3 vertexD =
+            getVertexFromQuad(mesh, quad, vertexDIndexInQuad);
+
+        const Color vertexALight = calculateLightIntensity(
+            x, z, data, worldSize, lightPosition, vertexA
         );
-        vertexIndex += 3;
-
-        const Vector3 pointC {
-            mesh.vertices[vertexIndex + 0],
-            mesh.vertices[vertexIndex + 1],
-            mesh.vertices[vertexIndex + 2]
-        };
-        const uint8_t pointCIntensity = calculateLightIntensity(
-            x, z + 1, data, worldSize, lightPosition, pointC
+        const Color vertexBLight = calculateLightIntensity(
+            x + 1, z, data, worldSize, lightPosition, vertexB
         );
-
-        vertexIndex += 3;
-
-        const Vector3 pointB {
-            mesh.vertices[vertexIndex + 0],
-            mesh.vertices[vertexIndex + 1],
-            mesh.vertices[vertexIndex + 2]
-        };
-        const uint8_t pointBIntensity = calculateLightIntensity(
-            x + 1, z, data, worldSize, lightPosition, pointB
+        const Color vertexCLight = calculateLightIntensity(
+            x, z + 1, data, worldSize, lightPosition, vertexC
+        );
+        const Color vertexDLight = calculateLightIntensity(
+            x + 1, z + 1, data, worldSize, lightPosition, vertexD
         );
 
-        vertexIndex += 3;
-        // B
-        vertexIndex += 3;
-        // C
-        vertexIndex += 3;
-        const Vector3 pointD {
-            mesh.vertices[vertexIndex + 0],
-            mesh.vertices[vertexIndex + 1],
-            mesh.vertices[vertexIndex + 2]
-        };
-        const uint8_t pointDIntensity = calculateLightIntensity(
-            x + 1, z + 1, data, worldSize, lightPosition, pointD
-        );
-
-        // A
-        mesh.colors[colorIndex + 0] = pointAIntensity;
-        mesh.colors[colorIndex + 1] = pointAIntensity;
-        mesh.colors[colorIndex + 2] = pointAIntensity;
-        mesh.colors[colorIndex + 3] = 255;
-
+        addColor(mesh, colorIndex, vertexALight);
         colorIndex += 4;
 
-        // C
-        mesh.colors[colorIndex + 0] = pointCIntensity;
-        mesh.colors[colorIndex + 1] = pointCIntensity;
-        mesh.colors[colorIndex + 2] = pointCIntensity;
-        mesh.colors[colorIndex + 3] = 255;
-
+        addColor(mesh, colorIndex, vertexCLight);
         colorIndex += 4;
 
-        // B
-        mesh.colors[colorIndex + 0] = pointBIntensity;
-        mesh.colors[colorIndex + 1] = pointBIntensity;
-        mesh.colors[colorIndex + 2] = pointBIntensity;
-        mesh.colors[colorIndex + 3] = 255;
-
+        addColor(mesh, colorIndex, vertexBLight);
         colorIndex += 4;
 
-        // B
-        mesh.colors[colorIndex + 0] = pointBIntensity;
-        mesh.colors[colorIndex + 1] = pointBIntensity;
-        mesh.colors[colorIndex + 2] = pointBIntensity;
-        mesh.colors[colorIndex + 3] = 255;
-
+        addColor(mesh, colorIndex, vertexBLight);
         colorIndex += 4;
 
-        // C
-        mesh.colors[colorIndex + 0] = pointCIntensity;
-        mesh.colors[colorIndex + 1] = pointCIntensity;
-        mesh.colors[colorIndex + 2] = pointCIntensity;
-        mesh.colors[colorIndex + 3] = 255;
-
+        addColor(mesh, colorIndex, vertexCLight);
         colorIndex += 4;
 
-        // D
-        mesh.colors[colorIndex + 0] = pointDIntensity;
-        mesh.colors[colorIndex + 1] = pointDIntensity;
-        mesh.colors[colorIndex + 2] = pointDIntensity;
-        mesh.colors[colorIndex + 3] = 255;
-
+        addColor(mesh, colorIndex, vertexDLight);
         colorIndex += 4;
     }
 }
@@ -354,40 +327,28 @@ void MeshGenerator::updateTrianglesHeight(
         const uint32_t x = quad % quadsPerRow;
         const uint32_t z = quad / quadsPerRow;
 
-        // A
-        mesh.vertices[vertexIndex + 1] =
-            data.heightAt(x, z) * worldSize.y;
-
-        vertexIndex += 3;
-
-        // C
-        mesh.vertices[vertexIndex + 1] =
-            data.heightAt(x, z + 1) * worldSize.y;
-
-        vertexIndex += 3;
-
-        // B
-        mesh.vertices[vertexIndex + 1] =
-            data.heightAt(x + 1, z) * worldSize.y;
-
-        vertexIndex += 3;
-
-        // B
-        mesh.vertices[vertexIndex + 1] =
-            data.heightAt(x + 1, z) * worldSize.y;
-
-        vertexIndex += 3;
-
-        // C
-        mesh.vertices[vertexIndex + 1] =
-            data.heightAt(x, z + 1) * worldSize.y;
-
-        vertexIndex += 3;
-
-        // D
-        mesh.vertices[vertexIndex + 1] =
+        const float pointAHeight = data.heightAt(x, z) * worldSize.y;
+        const float pointBHeight = data.heightAt(x + 1, z) * worldSize.y;
+        const float pointCHeight = data.heightAt(x, z + 1) * worldSize.y;
+        const float pointDHeight =
             data.heightAt(x + 1, z + 1) * worldSize.y;
 
+        mesh.vertices[vertexIndex + 1] = pointAHeight;
+        vertexIndex += 3;
+
+        mesh.vertices[vertexIndex + 1] = pointCHeight;
+        vertexIndex += 3;
+
+        mesh.vertices[vertexIndex + 1] = pointBHeight;
+        vertexIndex += 3;
+
+        mesh.vertices[vertexIndex + 1] = pointBHeight;
+        vertexIndex += 3;
+
+        mesh.vertices[vertexIndex + 1] = pointCHeight;
+        vertexIndex += 3;
+
+        mesh.vertices[vertexIndex + 1] = pointDHeight;
         vertexIndex += 3;
     }
 }
@@ -402,11 +363,10 @@ Mesh MeshGenerator::generateIlluminatedMesh(
     const uint32_t totalQuadsNumber =
         (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
 
-    setupMesh(mesh, terrainData, totalQuadsNumber);
+    setupMesh(mesh, totalQuadsNumber);
 
     addTriangles(mesh, terrainData, worldSize, 0, totalQuadsNumber);
     addTextureCoords(mesh, terrainData, 0, totalQuadsNumber);
-
     addLighting(
         mesh, terrainData, worldSize, lightPosition, 0, totalQuadsNumber
     );
