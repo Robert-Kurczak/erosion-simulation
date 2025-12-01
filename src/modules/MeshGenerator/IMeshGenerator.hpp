@@ -8,14 +8,16 @@ class IMeshGenerator {
 public:
     virtual ~IMeshGenerator() = default;
 
-    virtual Mesh generateMesh(
+    virtual Mesh generateIlluminatedMesh(
         const TerrainData& terrainData,
-        const Vector3& worldSize
+        const Vector3& worldSize,
+        const Vector3& lightPosition
     ) = 0;
 
-    virtual void updateMesh(
+    virtual void updateIlluminatedMesh(
         Mesh& mesh,
         const TerrainData& terrainData,
-        const Vector3& worldSize
+        const Vector3& worldSize,
+        const Vector3& lightPosition
     ) = 0;
 };

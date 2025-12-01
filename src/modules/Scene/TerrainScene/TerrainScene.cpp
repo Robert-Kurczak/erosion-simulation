@@ -13,8 +13,8 @@ void TerrainScene::setupCamera() {
 }
 
 void TerrainScene::setupTerrain() {
-    const uint32_t resolutionX = 1000;
-    const uint32_t resolutionZ = 1000;
+    const uint32_t resolutionX = 1024;
+    const uint32_t resolutionZ = 1024;
     const float featureSize = 1.0f;
     const uint32_t seed = 20;
 
@@ -25,14 +25,16 @@ void TerrainScene::setupTerrain() {
     TerrainModelConfig terrainModelConfig {
         .worldSize =
             Vector3 {
-                     .x = 120,
+                     .x = 128,
                      .y = 64,
-                     .z = 120,
+                     .z = 128,
                      },
         .worldPosition = Vector3 {.x = 0, .y = 0, .z = 0}
     };
 
-    terrainRenderer_.setupModel(terrainData_, terrainModelConfig);
+    terrainRenderer_.setupModel(
+        terrainData_, terrainModelConfig, lightSourcePosition_
+    );
 }
 
 TerrainScene::TerrainScene(
@@ -59,7 +61,7 @@ void TerrainScene::draw() {
         modifier->modify(terrainData_);
     }
 
-    terrainRenderer_.renderModel(terrainData_);
+    terrainRenderer_.renderModel(terrainData_, lightSourcePosition_);
 
     EndMode3D();
     DrawText(TextFormat("FPS: %d", GetFPS()), 10, 10, 30, BLACK);

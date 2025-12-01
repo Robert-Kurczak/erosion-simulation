@@ -243,7 +243,7 @@ void MeshGenerator::addLighting(
         const uint32_t z = quad / quadsPerRow;
 
         uint32_t vertexIndex =
-            startQuad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
+            quad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
         const Vector3 pointA {
             mesh.vertices[vertexIndex + 0],
             mesh.vertices[vertexIndex + 1],
@@ -338,9 +338,64 @@ void MeshGenerator::addLighting(
     }
 }
 
-Mesh MeshGenerator::generateMesh(
+void MeshGenerator::updateTrianglesHeight(
+    Mesh& mesh,
+    const TerrainData& data,
+    const Vector3& worldSize,
+    uint32_t startQuad,
+    uint32_t endQuad
+) {
+    const uint32_t quadsPerRow = data.resolutionX - 1;
+
+    uint32_t vertexIndex =
+        startQuad * VERTICES_PER_QUAD * COORDS_PER_VERTEX;
+
+    for (uint32_t quad = startQuad; quad < endQuad; quad++) {
+        const uint32_t x = quad % quadsPerRow;
+        const uint32_t z = quad / quadsPerRow;
+
+        // A
+        mesh.vertices[vertexIndex + 1] =
+            data.heightAt(x, z) * worldSize.y;
+
+        vertexIndex += 3;
+
+        // C
+        mesh.vertices[vertexIndex + 1] =
+            data.heightAt(x, z + 1) * worldSize.y;
+
+        vertexIndex += 3;
+
+        // B
+        mesh.vertices[vertexIndex + 1] =
+            data.heightAt(x + 1, z) * worldSize.y;
+
+        vertexIndex += 3;
+
+        // B
+        mesh.vertices[vertexIndex + 1] =
+            data.heightAt(x + 1, z) * worldSize.y;
+
+        vertexIndex += 3;
+
+        // C
+        mesh.vertices[vertexIndex + 1] =
+            data.heightAt(x, z + 1) * worldSize.y;
+
+        vertexIndex += 3;
+
+        // D
+        mesh.vertices[vertexIndex + 1] =
+            data.heightAt(x + 1, z + 1) * worldSize.y;
+
+        vertexIndex += 3;
+    }
+}
+
+Mesh MeshGenerator::generateIlluminatedMesh(
     const TerrainData& terrainData,
-    const Vector3& worldSize
+    const Vector3& worldSize,
+    const Vector3& lightPosition
 ) {
     Mesh mesh {};
 
@@ -352,7 +407,6 @@ Mesh MeshGenerator::generateMesh(
     addTriangles(mesh, terrainData, worldSize, 0, totalQuadsNumber);
     addTextureCoords(mesh, terrainData, 0, totalQuadsNumber);
 
-    const Vector3 lightPosition {0, 100, 0};
     addLighting(
         mesh, terrainData, worldSize, lightPosition, 0, totalQuadsNumber
     );
@@ -360,11 +414,20 @@ Mesh MeshGenerator::generateMesh(
     return mesh;
 }
 
-void MeshGenerator::updateMesh(
+void MeshGenerator::updateIlluminatedMesh(
     Mesh& mesh,
     const TerrainData& terrainData,
-    const Vector3& worldSize
+    const Vector3& worldSize,
+    const Vector3& lightPosition
 ) {
-    // updateVertices(mesh, terrainData);
-    // updateLighting(mesh, terrainData);
+    const uint32_t totalQuadsNumber =
+        (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
+
+    updateTrianglesHeight(
+        mesh, terrainData, worldSize, 0, totalQuadsNumber
+    );
+
+    addLighting(
+        mesh, terrainData, worldSize, lightPosition, 0, totalQuadsNumber
+    );
 }

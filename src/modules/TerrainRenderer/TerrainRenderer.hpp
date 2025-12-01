@@ -3,8 +3,6 @@
 #include "ITerrainRenderer.hpp"
 #include "MeshGenerator/IMeshGenerator.hpp"
 
-#include <raylib.h>
-
 class TerrainRenderer : public ITerrainRenderer {
 private:
     IMeshGenerator& meshGenerator_;
@@ -22,8 +20,12 @@ public:
 
     virtual void setupModel(
         const TerrainData& terrainData,
-        const TerrainModelConfig& config
+        const TerrainModelConfig& config,
+        const Vector3& lightSource
     ) override;
 
-    virtual void renderModel(const TerrainData& terrainData) override;
+    virtual void renderModel(
+        const TerrainData& terrainData,
+        const Vector3& lightSource
+    ) override;
 };

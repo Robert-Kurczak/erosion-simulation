@@ -50,15 +50,25 @@ private:
         uint32_t endQuad
     );
 
+    void updateTrianglesHeight(
+        Mesh& mesh,
+        const TerrainData& data,
+        const Vector3& worldSize,
+        uint32_t startQuad,
+        uint32_t endQuad
+    );
+
 public:
-    virtual Mesh generateMesh(
+    virtual Mesh generateIlluminatedMesh(
         const TerrainData& terrainData,
-        const Vector3& worldSize
+        const Vector3& worldSize,
+        const Vector3& lightPosition
     ) override;
 
-    virtual void updateMesh(
+    virtual void updateIlluminatedMesh(
         Mesh& mesh,
         const TerrainData& terrainData,
-        const Vector3& worldSize
+        const Vector3& worldSize,
+        const Vector3& lightPosition
     ) override;
 };

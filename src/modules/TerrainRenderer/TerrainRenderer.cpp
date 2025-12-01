@@ -44,12 +44,14 @@ TerrainRenderer::TerrainRenderer(IMeshGenerator& meshGenerator) :
 
 void TerrainRenderer::setupModel(
     const TerrainData& terrainData,
-    const TerrainModelConfig& config
+    const TerrainModelConfig& config,
+    const Vector3& lightSource
 ) {
     const Image textureImage = convertToTextureImage(terrainData);
 
-    terrainMesh_ =
-        meshGenerator_.generateMesh(terrainData, config.worldSize);
+    terrainMesh_ = meshGenerator_.generateIlluminatedMesh(
+        terrainData, config.worldSize, lightSource
+    );
 
     UploadMesh(&terrainMesh_, true);
 
@@ -65,9 +67,12 @@ void TerrainRenderer::setupModel(
     UnloadImage(textureImage);
 }
 
-void TerrainRenderer::renderModel(const TerrainData& terrainData) {
-    meshGenerator_.updateMesh(
-        terrainMesh_, terrainData, terrainWorldSize_
+void TerrainRenderer::renderModel(
+    const TerrainData& terrainData,
+    const Vector3& lightSource
+) {
+    meshGenerator_.updateIlluminatedMesh(
+        terrainMesh_, terrainData, terrainWorldSize_, lightSource
     );
 
     UpdateMeshBuffer(
