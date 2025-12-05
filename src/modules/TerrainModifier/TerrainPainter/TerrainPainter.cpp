@@ -7,8 +7,22 @@ Color TerrainPainter::convertHeightToColor(double height) {
         height = 1;
     }
 
-    const uint8_t colorIndex = COLOR_GRADIENT_.size() * height;
-    return COLOR_GRADIENT_[colorIndex];
+    const double scaledColorIndex = (COLOR_GRADIENT_.size() - 1) * height;
+    const uint8_t lowerColorIndex = uint8_t(scaledColorIndex);
+    const uint8_t upperColorIndex = uint8_t(scaledColorIndex + 1);
+    const double colorSlope = scaledColorIndex - lowerColorIndex;
+
+    const Color lowerColor = COLOR_GRADIENT_[lowerColorIndex];
+    const Color upperColor = COLOR_GRADIENT_[upperColorIndex];
+
+    const Color interpolatedColor {
+        lowerColor.r + (upperColor.r - lowerColor.r) * colorSlope,
+        lowerColor.g + (upperColor.g - lowerColor.g) * colorSlope,
+        lowerColor.b + (upperColor.b - lowerColor.b) * colorSlope,
+        255
+    };
+
+    return interpolatedColor;
 }
 
 void TerrainPainter::modify(TerrainData& terrainData) {
