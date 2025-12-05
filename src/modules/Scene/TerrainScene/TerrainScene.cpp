@@ -35,6 +35,29 @@ void TerrainScene::setupTerrain() {
     );
 }
 
+void TerrainScene::drawUi() {
+    const Color fontColor = WHITE;
+    const uint8_t fontSize = 30;
+    const uint8_t leftMargin = 10;
+    const uint8_t topMargin = 10;
+
+    DrawText(
+        TextFormat("FPS: %d", GetFPS()),
+        leftMargin,
+        topMargin,
+        fontSize,
+        fontColor
+    );
+
+    DrawText(
+        TextFormat("Vertices: %d", terrainData_.heightMap.size()),
+        leftMargin,
+        fontSize + topMargin,
+        fontSize,
+        fontColor
+    );
+}
+
 TerrainScene::TerrainScene(
     ITerrainGenerator& terrainGenerator,
     const std::vector<ITerrainModifier*>& terrainModifiers,
@@ -53,7 +76,7 @@ void TerrainScene::draw() {
     BeginDrawing();
     BeginMode3D(mainCamera_);
 
-    ClearBackground(DARKGRAY);
+    ClearBackground(BLACK);
 
     for (const auto& modifier : terrainModifiers_) {
         modifier->modify(terrainData_);
@@ -62,7 +85,6 @@ void TerrainScene::draw() {
     terrainRenderer_.renderModel(terrainData_, lightSourcePosition_);
 
     EndMode3D();
-    DrawText(TextFormat("FPS: %d", GetFPS()), 10, 10, 30, BLACK);
-
+    drawUi();
     EndDrawing();
 }

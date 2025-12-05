@@ -19,6 +19,8 @@ private:
     void setupCamera();
     void setupTerrain();
 
+    void drawUi();
+
 public:
     TerrainScene(
         ITerrainGenerator& terrainGenerator,
