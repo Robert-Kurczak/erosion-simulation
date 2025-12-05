@@ -1,7 +1,5 @@
 #include "TerrainScene.hpp"
 
-#include "Terrain/TerrainModelConfig.hpp"
-
 #include <cstring>
 #include <raymath.h>
 
@@ -13,18 +11,8 @@ void TerrainScene::setupTerrain() {
         resolutionX, resolutionZ, terrainSeed_
     );
 
-    TerrainModelConfig terrainModelConfig {
-        .worldSize =
-            Vector3 {
-                     .x = 256,
-                     .y = 64,
-                     .z = 256,
-                     },
-        .worldPosition = Vector3 {.x = 0, .y = 0, .z = 0}
-    };
-
     terrainRenderer_.setupModel(
-        terrainData_, terrainModelConfig, lightSourcePosition_
+        terrainData_, terrainModelConfig_, lightSourcePosition_
     );
 }
 
@@ -37,14 +25,12 @@ void TerrainScene::setupCamera() {
 }
 
 void TerrainScene::setCameraZoom(float zoom) {
-    const float zoomSpeed = 5.0f;
-
     const Vector3 cameraDirection = Vector3Normalize(
         Vector3Subtract(mainCamera_.position, mainCamera_.target)
     );
 
     const Vector3 zoomVector =
-        Vector3Scale(cameraDirection, zoom * zoomSpeed);
+        Vector3Scale(cameraDirection, zoom * zoomSpeed_);
 
     mainCamera_.position = Vector3Add(mainCamera_.position, zoomVector);
 }
