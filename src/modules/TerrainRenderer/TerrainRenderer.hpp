@@ -15,6 +15,8 @@ private:
 
     Image convertToTextureImage(const TerrainData& terrainData);
 
+    void cleanup();
+
 public:
     TerrainRenderer(IMeshGenerator& meshGenerator);
 

@@ -39,6 +39,10 @@ Image TerrainRenderer::convertToTextureImage(
     return textureImage;
 }
 
+void TerrainRenderer::cleanup() {
+    UnloadModel(terrainModel_);
+}
+
 TerrainRenderer::TerrainRenderer(IMeshGenerator& meshGenerator) :
     meshGenerator_(meshGenerator) {}
 
@@ -47,6 +51,8 @@ void TerrainRenderer::setupModel(
     const TerrainModelConfig& config,
     const Vector3& lightSource
 ) {
+    cleanup();
+
     const Image textureImage = convertToTextureImage(terrainData);
 
     terrainMesh_ = meshGenerator_.generateIlluminatedMesh(

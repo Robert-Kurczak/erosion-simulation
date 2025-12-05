@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../IScene.hpp"
+#include "InputController/IInputController.hpp"
 #include "Terrain/TerrainData.hpp"
 #include "TerrainGenerator/ITerrainGenerator.hpp"
 #include "TerrainModifier/ITerrainModifier.hpp"
@@ -8,6 +9,7 @@
 
 class TerrainScene : public IScene {
 private:
+    IInputController& inputController_;
     ITerrainGenerator& terrainGenerator_;
     const std::vector<ITerrainModifier*>& terrainModifiers_;
     ITerrainRenderer& terrainRenderer_;
@@ -15,14 +17,19 @@ private:
     Camera3D mainCamera_ {};
     TerrainData terrainData_;
     Vector3 lightSourcePosition_ {0, 100, 0};
+    uint32_t terrainSeed_ = 20;
 
     void setupCamera();
     void setupTerrain();
+    void setCameraZoom(float zoom);
 
-    void drawUi();
+    void renderModels();
+    void renderUi();
+    void handleInput();
 
 public:
     TerrainScene(
+        IInputController& inputController,
         ITerrainGenerator& terrainGenerator,
         const std::vector<ITerrainModifier*>& terrainModifiers,
         ITerrainRenderer& terrainRenderer

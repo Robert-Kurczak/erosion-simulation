@@ -1,5 +1,6 @@
 #include "Application/Application.hpp"
 #include "Application/ApplicationConfig.hpp"
+#include "InputController/KeyboardInputController.hpp"
 #include "MeshGenerator/MeshGenerator.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
@@ -16,6 +17,8 @@ ApplicationConfig applicationConfig_ {
     .framesPerSeconds = 120
 };
 
+KeyboardInputController keyboardInputController_ {};
+
 PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
 TerrainPainter terrainPainter_ {};
@@ -27,6 +30,7 @@ MeshGenerator meshGenerator_ {};
 TerrainRenderer terrainRenderer_ {meshGenerator_};
 
 TerrainScene terrainScene_ {
+    keyboardInputController_,
     terrainGenerator_,
     terrainModifiers_,
     terrainRenderer_

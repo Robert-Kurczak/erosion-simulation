@@ -7,6 +7,8 @@
 
 class ITerrainRenderer {
 public:
+    virtual ~ITerrainRenderer() = default;
+
     virtual void setupModel(
         const TerrainData& terrainData,
         const TerrainModelConfig& config,
