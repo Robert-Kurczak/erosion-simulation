@@ -16,9 +16,15 @@ Color TerrainPainter::convertHeightToColor(double height) {
     const Color upperColor = COLOR_GRADIENT_[upperColorIndex];
 
     const Color interpolatedColor {
-        lowerColor.r + (upperColor.r - lowerColor.r) * colorSlope,
-        lowerColor.g + (upperColor.g - lowerColor.g) * colorSlope,
-        lowerColor.b + (upperColor.b - lowerColor.b) * colorSlope,
+        uint8_t(
+            lowerColor.r + (upperColor.r - lowerColor.r) * colorSlope
+        ),
+        uint8_t(
+            lowerColor.g + (upperColor.g - lowerColor.g) * colorSlope
+        ),
+        uint8_t(
+            lowerColor.b + (upperColor.b - lowerColor.b) * colorSlope
+        ),
         255
     };
 
