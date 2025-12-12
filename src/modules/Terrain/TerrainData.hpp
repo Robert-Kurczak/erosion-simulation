@@ -1,5 +1,7 @@
 #pragma once
 
+#include "RainGenerator/RainDrop.hpp"
+
 #include <raylib.h>
 #include <stdint.h>
 #include <vector>
@@ -10,6 +12,7 @@ struct TerrainData {
 
     std::vector<double> heightMap;
     std::vector<Color> colorMap;
+    std::vector<RainDrop> rainMap;
 
     double heightAt(uint32_t x, uint32_t z) const {
         return heightMap[z * resolutionX + x];

@@ -7,8 +7,17 @@ void TerrainScene::setupTerrain() {
     const uint32_t resolutionX = 1024;
     const uint32_t resolutionZ = 1024;
 
-    terrainData_ = terrainGenerator_.generateTerrain(
+    terrainData_.resolutionX = resolutionX;
+    terrainData_.resolutionZ = resolutionZ;
+
+    terrainData_.heightMap = terrainGenerator_.generateTerrain(
         resolutionX, resolutionZ, terrainSeed_
+    );
+
+    terrainData_.colorMap = std::vector<Color>(resolutionX * resolutionZ);
+
+    terrainData_.rainMap = rainGenerator_.generateRainDrops(
+        terrainModelConfig_.worldSize, rainDropsAmount_, terrainSeed_
     );
 
     terrainRenderer_.setupModel(
@@ -95,11 +104,13 @@ void TerrainScene::handleInput() {
 TerrainScene::TerrainScene(
     IInputController& inputController,
     ITerrainGenerator& terrainGenerator,
+    IRainGenerator& rainGenerator,
     const std::vector<ITerrainModifier*>& terrainModifiers,
     ITerrainRenderer& terrainRenderer
 ) :
     inputController_(inputController),
     terrainGenerator_(terrainGenerator),
+    rainGenerator_(rainGenerator),
     terrainModifiers_(terrainModifiers),
     terrainRenderer_(terrainRenderer) {}
 

@@ -22,15 +22,7 @@ std::vector<double> PerlinNoiseTerrainGenerator::
     return heightMap;
 }
 
-std::vector<Color> PerlinNoiseTerrainGenerator::createInitialColorMap(
-    uint32_t resolutionX,
-    uint32_t resolutionZ
-) {
-    const std::vector<Color> colorMap(resolutionX * resolutionZ, RED);
-    return colorMap;
-}
-
-TerrainData PerlinNoiseTerrainGenerator::generateTerrain(
+std::vector<double> PerlinNoiseTerrainGenerator::generateTerrain(
     uint32_t resolutionX,
     uint32_t resolutionZ,
     uint32_t seed
@@ -44,14 +36,7 @@ TerrainData PerlinNoiseTerrainGenerator::generateTerrain(
     noiseGenerator.SetFractalGain(0.4f);
     noiseGenerator.SetFrequency(0.8f / float(resolutionX));
 
-    const TerrainData terrainData {
-        .resolutionX = resolutionX,
-        .resolutionZ = resolutionZ,
-        .heightMap = createNormalizedHeightMap(
-            noiseGenerator, resolutionX, resolutionZ
-        ),
-        .colorMap = createInitialColorMap(resolutionX, resolutionZ)
-    };
-
-    return terrainData;
+    return createNormalizedHeightMap(
+        noiseGenerator, resolutionX, resolutionZ
+    );
 }

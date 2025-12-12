@@ -12,13 +12,8 @@ private:
         uint32_t resolutionZ
     );
 
-    std::vector<Color> createInitialColorMap(
-        uint32_t resolutionX,
-        uint32_t resolutionZ
-    );
-
 public:
-    virtual TerrainData generateTerrain(
+    virtual std::vector<double> generateTerrain(
         uint32_t resolutionX,
         uint32_t resolutionZ,
         uint32_t seed

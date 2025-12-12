@@ -2,6 +2,7 @@
 #include "Application/ApplicationConfig.hpp"
 #include "InputController/KeyboardInputController.hpp"
 #include "MeshGenerator/MeshGenerator.hpp"
+#include "RainGenerator/RainGenerator.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
 #include "TerrainModifier/TerrainPainter/TerrainPainter.hpp"
@@ -21,6 +22,8 @@ KeyboardInputController keyboardInputController_ {};
 
 PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
+RainGenerator rainGenerator_ {};
+
 TerrainPainter terrainPainter_ {};
 
 const std::vector<ITerrainModifier*> terrainModifiers_ {&terrainPainter_};
@@ -32,6 +35,7 @@ TerrainRenderer terrainRenderer_ {meshGenerator_};
 TerrainScene terrainScene_ {
     keyboardInputController_,
     terrainGenerator_,
+    rainGenerator_,
     terrainModifiers_,
     terrainRenderer_
 };
