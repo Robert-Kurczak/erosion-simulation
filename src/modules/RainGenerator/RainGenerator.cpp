@@ -19,12 +19,16 @@ std::vector<RainDrop> RainGenerator::generateRainDrops(
         const float randomZ =
             (noiseGenerator.GetNoise(0.0f, float(i)) + 1.0) / 2.0f;
 
-        const Vector3 randomPosition {
-            randomX * worldArea.x, worldArea.y, randomZ * worldArea.z
+        const Vector2 position {
+            randomX * worldArea.x, randomZ * worldArea.z
         };
 
+        const Vector2 velocity {0, 0};
+
         const RainDrop rainDrop {
-            .worldPosition = randomPosition, .deposition = 0.0f
+            .worldPosition = position,
+            .velocity = velocity,
+            .deposition = 0.0f
         };
 
         rainDrops.push_back(rainDrop);

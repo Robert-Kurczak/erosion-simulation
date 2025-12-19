@@ -3,6 +3,7 @@
 #include <raylib.h>
 
 struct RainDrop {
-    Vector3 worldPosition;
+    Vector2 worldPosition;
+    Vector2 velocity;
     float deposition;
 };

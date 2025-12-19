@@ -5,6 +5,7 @@
 #include "RainGenerator/RainGenerator.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
+#include "TerrainModifier/HydraulicErosion/HydraulicErosion.hpp"
 #include "TerrainModifier/TerrainPainter/TerrainPainter.hpp"
 #include "TerrainRenderer/TerrainRenderer.hpp"
 
@@ -25,8 +26,12 @@ PerlinNoiseTerrainGenerator terrainGenerator_ {};
 RainGenerator rainGenerator_ {};
 
 TerrainPainter terrainPainter_ {};
+HydraulicErosion hydraulicErosion_ {};
 
-const std::vector<ITerrainModifier*> terrainModifiers_ {&terrainPainter_};
+const std::vector<ITerrainModifier*> terrainModifiers_ {
+    &terrainPainter_,
+    &hydraulicErosion_
+};
 
 MeshGenerator meshGenerator_ {};
 

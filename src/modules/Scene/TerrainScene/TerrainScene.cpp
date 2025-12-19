@@ -75,6 +75,14 @@ void TerrainScene::renderUi() {
         fontSize,
         fontColor
     );
+
+    DrawText(
+        TextFormat("Rain drops: %d", terrainData_.rainMap.size()),
+        leftMargin,
+        2 * fontSize + topMargin,
+        fontSize,
+        fontColor
+    );
 }
 
 void TerrainScene::handleInput() {
