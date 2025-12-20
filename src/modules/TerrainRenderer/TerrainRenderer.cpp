@@ -48,27 +48,21 @@ TerrainRenderer::TerrainRenderer(IMeshGenerator& meshGenerator) :
 
 void TerrainRenderer::setupModel(
     const TerrainData& terrainData,
-    const TerrainModelConfig& config,
     const Vector3& lightSource
 ) {
     cleanup();
 
     const Image textureImage = convertToTextureImage(terrainData);
 
-    terrainMesh_ = meshGenerator_.generateIlluminatedMesh(
-        terrainData, config.worldSize, lightSource
-    );
+    terrainMesh_ =
+        meshGenerator_.generateIlluminatedMesh(terrainData, lightSource);
 
     UploadMesh(&terrainMesh_, true);
 
     terrainModel_ = LoadModelFromMesh(terrainMesh_);
     terrainTexture_ = LoadTextureFromImage(textureImage);
-
     terrainModel_.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture =
         terrainTexture_;
-
-    terrainPosition_ = config.worldPosition;
-    terrainWorldSize_ = config.worldSize;
 
     UnloadImage(textureImage);
 }
@@ -78,7 +72,7 @@ void TerrainRenderer::renderModel(
     const Vector3& lightSource
 ) {
     meshGenerator_.updateIlluminatedMesh(
-        terrainMesh_, terrainData, terrainWorldSize_, lightSource
+        terrainMesh_, terrainData, lightSource
     );
 
     UpdateMeshBuffer(
@@ -98,5 +92,5 @@ void TerrainRenderer::renderModel(
     );
 
     UpdateTexture(terrainTexture_, terrainData.colorMap.data());
-    DrawModel(terrainModel_, terrainPosition_, 1.0f, WHITE);
+    DrawModel(terrainModel_, terrainData.worldPosition, 1.0f, WHITE);
 }

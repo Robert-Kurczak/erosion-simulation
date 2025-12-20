@@ -9,6 +9,8 @@
 struct TerrainData {
     uint32_t resolutionX;
     uint32_t resolutionZ;
+    Vector3 worldSize;
+    Vector3 worldPosition;
 
     std::vector<double> heightMap;
     std::vector<Color> colorMap;
@@ -18,11 +20,9 @@ struct TerrainData {
         return heightMap[z * resolutionX + x];
     }
 
-    double heightAt(const Vector2& index) const {
-        return heightMap[index.y * resolutionX + index.x];
-    }
-
-    Color colorAt(const Vector2& index) const {
-        return colorMap[index.y * resolutionX + index.x];
+    double& mutableHeightAtWorldPosition(const Vector2& position) {
+        const uint32_t x = (position.x / worldSize.x) * resolutionX;
+        const uint32_t z = (position.y / worldSize.z) * resolutionZ;
+        return heightMap[z * resolutionX + x];
     }
 };

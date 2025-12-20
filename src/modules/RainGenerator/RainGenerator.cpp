@@ -31,7 +31,7 @@ std::vector<RainDrop> RainGenerator::generateRainDrops(
             .deposition = 0.0f
         };
 
-        rainDrops.push_back(rainDrop);
+        rainDrops[i] = rainDrop;
     }
 
     return rainDrops;

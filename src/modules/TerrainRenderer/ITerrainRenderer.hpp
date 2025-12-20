@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Terrain/TerrainData.hpp"
-#include "Terrain/TerrainModelConfig.hpp"
+#include "TerrainData/TerrainData.hpp"
 
 #include <raylib.h>
 
@@ -11,7 +10,6 @@ public:
 
     virtual void setupModel(
         const TerrainData& terrainData,
-        const TerrainModelConfig& config,
         const Vector3& lightSource
     ) = 0;
 

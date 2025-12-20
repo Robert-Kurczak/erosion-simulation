@@ -10,8 +10,6 @@ private:
     Mesh terrainMesh_;
     Model terrainModel_;
     Texture2D terrainTexture_;
-    Vector3 terrainPosition_;
-    Vector3 terrainWorldSize_;
 
     Image convertToTextureImage(const TerrainData& terrainData);
 
@@ -22,7 +20,6 @@ public:
 
     virtual void setupModel(
         const TerrainData& terrainData,
-        const TerrainModelConfig& config,
         const Vector3& lightSource
     ) override;
 

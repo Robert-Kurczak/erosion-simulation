@@ -4,25 +4,22 @@
 #include <raymath.h>
 
 void TerrainScene::setupTerrain() {
-    const uint32_t resolutionX = 1024;
-    const uint32_t resolutionZ = 1024;
-
-    terrainData_.resolutionX = resolutionX;
-    terrainData_.resolutionZ = resolutionZ;
+    terrainData_.resolutionX = resolutionX_;
+    terrainData_.resolutionZ = resolutionZ_;
+    terrainData_.worldSize = terrainWorldSize_;
+    terrainData_.worldPosition = terrainWorldPosition_;
 
     terrainData_.heightMap = terrainGenerator_.generateTerrain(
-        resolutionX, resolutionZ, terrainSeed_
+        resolutionX_, resolutionZ_, terrainSeed_
     );
 
-    terrainData_.colorMap = std::vector<Color>(resolutionX * resolutionZ);
-
+    terrainData_.colorMap =
+        std::vector<Color>(resolutionX_ * resolutionZ_);
     terrainData_.rainMap = rainGenerator_.generateRainDrops(
-        terrainModelConfig_.worldSize, rainDropsAmount_, terrainSeed_
+        terrainWorldSize_, rainDropsAmount_, terrainSeed_
     );
 
-    terrainRenderer_.setupModel(
-        terrainData_, terrainModelConfig_, lightSourcePosition_
-    );
+    terrainRenderer_.setupModel(terrainData_, lightSourcePosition_);
 }
 
 void TerrainScene::setupCamera() {

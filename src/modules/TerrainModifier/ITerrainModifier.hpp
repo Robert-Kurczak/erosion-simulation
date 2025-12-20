@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Terrain/TerrainData.hpp"
+#include "TerrainData/TerrainData.hpp"
 
 class ITerrainModifier {
 public:

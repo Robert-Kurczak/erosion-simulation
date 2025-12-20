@@ -111,13 +111,13 @@ void HydraulicErosion::integrateStepRK4(
         terrainData
     );
 
-    drop.worldPosition = (k1.worldPosition + (k2.worldPosition * 2) +
-                          (k3.worldPosition * 2) + k4.worldPosition) *
-                         (timeStep / 6.0f);
+    drop.worldPosition += (k1.worldPosition + (k2.worldPosition * 2) +
+                           (k3.worldPosition * 2) + k4.worldPosition) *
+                          (timeStep / 6.0f);
 
-    drop.velocity = (k1.velocity + (k2.velocity * 2) + (k3.velocity * 2) +
-                     k4.velocity) *
-                    (timeStep / 6.0f);
+    drop.velocity += (k1.velocity + (k2.velocity * 2) +
+                      (k3.velocity * 2) + k4.velocity) *
+                     (timeStep / 6.0f);
 }
 
 void HydraulicErosion::modify(TerrainData& terrainData) {

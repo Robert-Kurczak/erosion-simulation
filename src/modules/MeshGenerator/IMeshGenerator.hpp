@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Terrain/TerrainData.hpp"
+#include "TerrainData/TerrainData.hpp"
 
 #include <raylib.h>
 
@@ -10,14 +10,12 @@ public:
 
     virtual Mesh generateIlluminatedMesh(
         const TerrainData& terrainData,
-        const Vector3& worldSize,
         const Vector3& lightPosition
     ) = 0;
 
     virtual void updateIlluminatedMesh(
         Mesh& mesh,
         const TerrainData& terrainData,
-        const Vector3& worldSize,
         const Vector3& lightPosition
     ) = 0;
 };
