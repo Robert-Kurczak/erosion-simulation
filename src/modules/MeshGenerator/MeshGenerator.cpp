@@ -24,8 +24,8 @@ inline Vector2 MeshGenerator::getTextureCoord(
     const TerrainData& data
 ) const {
     return Vector2 {
-        float(xIndex) / float(data.resolutionX - 1),
-        float(zIndex) / float(data.resolutionZ - 1)
+        float(xIndex) / float(data.getResolutionX() - 1),
+        float(zIndex) / float(data.getResolutionZ() - 1)
     };
 }
 
@@ -87,9 +87,9 @@ inline Color MeshGenerator::calculateLightIntensity(
 ) {
     const uint32_t leftIndex = xIndex == 0 ? 0 : xIndex - 1;
     const uint32_t rightIndex =
-        xIndex == data.resolutionX - 1 ? xIndex : xIndex + 1;
+        xIndex == data.getResolutionX() - 1 ? xIndex : xIndex + 1;
     const uint32_t upIndex =
-        zIndex == data.resolutionZ - 1 ? zIndex : zIndex + 1;
+        zIndex == data.getResolutionZ() - 1 ? zIndex : zIndex + 1;
     const uint32_t downIndex = zIndex == 0 ? 0 : zIndex - 1;
 
     const float heightLeft = data.heightAt(leftIndex, zIndex);
@@ -98,9 +98,9 @@ inline Color MeshGenerator::calculateLightIntensity(
     const float heightDown = data.heightAt(xIndex, downIndex);
 
     const Vector3 scale {
-        data.worldSize.x / float(data.resolutionX - 1),
-        data.worldSize.y,
-        data.worldSize.z / float(data.resolutionZ - 1)
+        data.getWorldSize().x / float(data.getResolutionX() - 1),
+        data.getWorldSize().y,
+        data.getWorldSize().z / float(data.getResolutionZ() - 1)
     };
 
     const Vector3 xDifference = {
@@ -156,18 +156,18 @@ void MeshGenerator::addTriangles(
     // B, C, D
 
     const Vector3 scale {
-        data.worldSize.x / float(data.resolutionX - 1),
-        data.worldSize.y,
-        data.worldSize.z / float(data.resolutionZ - 1)
+        data.getWorldSize().x / float(data.getResolutionX() - 1),
+        data.getWorldSize().y,
+        data.getWorldSize().z / float(data.getResolutionZ() - 1)
     };
 
     const Vector3 offset {
-        -(float(data.resolutionX) - 1) / 2.0f,
+        -(float(data.getResolutionX()) - 1) / 2.0f,
         0.0f,
-        -(float(data.resolutionZ) - 1) / 2.0f
+        -(float(data.getResolutionZ()) - 1) / 2.0f
     };
 
-    const uint32_t quadsPerRow = data.resolutionX - 1;
+    const uint32_t quadsPerRow = data.getResolutionX() - 1;
 
     uint32_t vertexIndex =
         startQuad * VERTICES_PER_QUAD_ * COORDS_PER_VERTEX_;
@@ -210,7 +210,7 @@ void MeshGenerator::addTextureCoords(
     uint32_t startQuad,
     uint32_t endQuad
 ) {
-    const uint32_t quadsPerRow = data.resolutionX - 1;
+    const uint32_t quadsPerRow = data.getResolutionX() - 1;
 
     uint32_t coordIndex =
         startQuad * VERTICES_PER_QUAD_ * COORDS_PER_TEXTURE_;
@@ -251,7 +251,7 @@ void MeshGenerator::addLighting(
     uint32_t startQuad,
     uint32_t endQuad
 ) {
-    const uint32_t quadsPerRow = data.resolutionX - 1;
+    const uint32_t quadsPerRow = data.getResolutionX() - 1;
 
     uint32_t colorIndex =
         startQuad * VERTICES_PER_QUAD_ * CHANNELS_PER_COLOR_;
@@ -313,7 +313,7 @@ void MeshGenerator::updateTrianglesHeight(
     uint32_t startQuad,
     uint32_t endQuad
 ) {
-    const uint32_t quadsPerRow = data.resolutionX - 1;
+    const uint32_t quadsPerRow = data.getResolutionX() - 1;
 
     uint32_t vertexIndex =
         startQuad * VERTICES_PER_QUAD_ * COORDS_PER_VERTEX_;
@@ -322,13 +322,14 @@ void MeshGenerator::updateTrianglesHeight(
         const uint32_t x = quad % quadsPerRow;
         const uint32_t z = quad / quadsPerRow;
 
-        const float pointAHeight = data.heightAt(x, z) * data.worldSize.y;
+        const float pointAHeight =
+            data.heightAt(x, z) * data.getWorldSize().y;
         const float pointBHeight =
-            data.heightAt(x + 1, z) * data.worldSize.y;
+            data.heightAt(x + 1, z) * data.getWorldSize().y;
         const float pointCHeight =
-            data.heightAt(x, z + 1) * data.worldSize.y;
+            data.heightAt(x, z + 1) * data.getWorldSize().y;
         const float pointDHeight =
-            data.heightAt(x + 1, z + 1) * data.worldSize.y;
+            data.heightAt(x + 1, z + 1) * data.getWorldSize().y;
 
         mesh.vertices[vertexIndex + 1] = pointAHeight;
         vertexIndex += COORDS_PER_VERTEX_;
@@ -404,8 +405,8 @@ Mesh MeshGenerator::generateIlluminatedMesh(
 ) {
     Mesh mesh {};
 
-    const uint32_t totalQuadsNumber =
-        (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
+    const uint32_t totalQuadsNumber = (terrainData.getResolutionX() - 1) *
+                                      (terrainData.getResolutionZ() - 1);
 
     const uint32_t quadsPerThread = totalQuadsNumber / threads_amount_;
 
@@ -441,8 +442,8 @@ void MeshGenerator::updateIlluminatedMesh(
     const TerrainData& terrainData,
     const Vector3& lightPosition
 ) {
-    const uint32_t totalQuadsNumber =
-        (terrainData.resolutionX - 1) * (terrainData.resolutionZ - 1);
+    const uint32_t totalQuadsNumber = (terrainData.getResolutionX() - 1) *
+                                      (terrainData.getResolutionZ() - 1);
 
     const uint32_t quadsPerThread = totalQuadsNumber / threads_amount_;
 

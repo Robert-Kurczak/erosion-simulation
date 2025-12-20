@@ -32,8 +32,11 @@ Color TerrainPainter::convertHeightToColor(double height) {
 }
 
 void TerrainPainter::modify(TerrainData& terrainData) {
-    for (size_t i = 0; i < terrainData.heightMap.size(); i++) {
-        const double height = terrainData.heightMap[i];
-        terrainData.colorMap[i] = convertHeightToColor(height);
+    std::vector<double>& heightMap = terrainData.getHeightMap();
+    std::vector<Color>& colorMap = terrainData.getColorMap();
+
+    for (size_t i = 0; i < terrainData.getHeightMap().size(); i++) {
+        const double height = heightMap[i];
+        colorMap[i] = convertHeightToColor(height);
     }
 }

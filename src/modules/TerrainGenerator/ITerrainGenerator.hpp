@@ -1,13 +1,14 @@
 #pragma once
 
+#include <span>
 #include <stdint.h>
-#include <vector>
 
 class ITerrainGenerator {
 public:
-    virtual std::vector<double> generateTerrain(
+    virtual void generateTerrain(
         uint32_t resolutionX,
         uint32_t resolutionZ,
-        uint32_t seed
+        uint32_t seed,
+        std::span<double> outputBuffer
     ) = 0;
 };

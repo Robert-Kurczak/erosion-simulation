@@ -3,19 +3,22 @@
 #include "../ITerrainGenerator.hpp"
 
 #include <FastNoiseLite.h>
+#include <vector>
 
 class PerlinNoiseTerrainGenerator : public ITerrainGenerator {
 private:
-    std::vector<double> createNormalizedHeightMap(
+    void fillHeightMap(
         const FastNoiseLite& noiseGenerator,
         uint32_t resolutionX,
-        uint32_t resolutionZ
+        uint32_t resolutionZ,
+        std::span<double> outputBuffer
     );
 
 public:
-    virtual std::vector<double> generateTerrain(
+    virtual void generateTerrain(
         uint32_t resolutionX,
         uint32_t resolutionZ,
-        uint32_t seed
+        uint32_t seed,
+        std::span<double> outputBuffer
     ) override;
 };

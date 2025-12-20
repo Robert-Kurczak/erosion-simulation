@@ -2,27 +2,56 @@
 
 #include "RainGenerator/RainDrop.hpp"
 
+#include <assert.h>
 #include <raylib.h>
 #include <stdint.h>
 #include <vector>
 
-struct TerrainData {
-    uint32_t resolutionX;
-    uint32_t resolutionZ;
-    Vector3 worldSize;
-    Vector3 worldPosition;
+class TerrainData {
+private:
+    const uint32_t resolutionX_;
+    const uint32_t resolutionZ_;
+    const Vector3 worldSize_;
+    const Vector3 worldPosition_;
 
-    std::vector<double> heightMap;
-    std::vector<Color> colorMap;
-    std::vector<RainDrop> rainMap;
+    std::vector<double> heightMap_;
+    std::vector<Color> colorMap_;
+    std::vector<RainDrop> rainMap_;
 
-    double heightAt(uint32_t x, uint32_t z) const {
-        return heightMap[z * resolutionX + x];
-    }
+public:
+    TerrainData(
+        const uint32_t resolutionX,
+        const uint32_t resolutionZ,
+        const Vector3& worldSize,
+        const Vector3& worldPosition,
+        uint32_t rainDropsAmount
+    );
 
-    double& mutableHeightAtWorldPosition(const Vector2& position) {
-        const uint32_t x = (position.x / worldSize.x) * resolutionX;
-        const uint32_t z = (position.y / worldSize.z) * resolutionZ;
-        return heightMap[z * resolutionX + x];
-    }
+    uint32_t getResolutionX() const;
+    uint32_t getResolutionZ() const;
+
+    const Vector3& getWorldSize() const;
+    const Vector3& getWorldPosition() const;
+
+    const std::vector<double>& getHeightMap() const;
+    std::vector<double>& getHeightMap();
+
+    const std::vector<Color>& getColorMap() const;
+    std::vector<Color>& getColorMap();
+
+    const std::vector<RainDrop>& getRainMap() const;
+    std::vector<RainDrop>& getRainMap();
+
+    Vector2 worldPositionToIndices(const Vector2& worldPosition) const;
+    Vector2 indicesToWorldPosition(uint32_t x, uint32_t z) const;
+
+    double heightAt(uint32_t index) const;
+    double heightAt(uint32_t x, uint32_t z) const;
+    double heightAtWorld(const Vector2& worldPosition) const;
+    double& mutableHeightAtWorld(const Vector2& worldPosition);
+
+    Color colorAt(uint32_t index) const;
+    Color colorAt(uint32_t x, uint32_t z) const;
+    Color colorAtWorld(const Vector2& worldPosition) const;
+    Color& mutableColorAtWorld(const Vector2& worldPosition);
 };

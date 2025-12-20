@@ -14,17 +14,14 @@ Vector2 HydraulicErosion::calculateGradient(
     // C------D
     // * - RainDrop on grid
 
-    const double pointAHeight =
-        terrainData.heightAt(uint32_t(position.x), uint32_t(position.y));
-    const double pointBHeight = terrainData.heightAt(
-        uint32_t(position.x + 1), uint32_t(position.y)
-    );
-    const double pointCHeight = terrainData.heightAt(
-        uint32_t(position.x), uint32_t(position.y + 1)
-    );
-    const double pointDHeight = terrainData.heightAt(
-        uint32_t(position.x + 1), uint32_t(position.y + 1)
-    );
+    const Vector2 indices = terrainData.worldPositionToIndices(position);
+    const uint32_t x = indices.x;
+    const uint32_t z = indices.y;
+
+    const double pointAHeight = terrainData.heightAt(x, z);
+    const double pointBHeight = terrainData.heightAt(x + 1, z);
+    const double pointCHeight = terrainData.heightAt(x, z + 1);
+    const double pointDHeight = terrainData.heightAt(x + 1, z + 1);
 
     const double slopeX1 = pointBHeight - pointAHeight;
     const double slopeX2 = pointDHeight - pointCHeight;
@@ -121,7 +118,9 @@ void HydraulicErosion::integrateStepRK4(
 }
 
 void HydraulicErosion::modify(TerrainData& terrainData) {
-    for (RainDrop& drop : terrainData.rainMap) {
-        integrateStepRK4(drop, terrainData, GetFrameTime());
+    for (RainDrop& drop : terrainData.getRainMap()) {
+        integrateStepRK4(drop, terrainData, 0.1);
+
+        terrainData.mutableColorAtWorld(drop.worldPosition) = RED;
     }
 }

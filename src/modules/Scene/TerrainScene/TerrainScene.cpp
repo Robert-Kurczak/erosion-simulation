@@ -4,19 +4,18 @@
 #include <raymath.h>
 
 void TerrainScene::setupTerrain() {
-    terrainData_.resolutionX = resolutionX_;
-    terrainData_.resolutionZ = resolutionZ_;
-    terrainData_.worldSize = terrainWorldSize_;
-    terrainData_.worldPosition = terrainWorldPosition_;
-
-    terrainData_.heightMap = terrainGenerator_.generateTerrain(
-        resolutionX_, resolutionZ_, terrainSeed_
+    terrainGenerator_.generateTerrain(
+        resolutionX_,
+        resolutionZ_,
+        terrainSeed_,
+        terrainData_.getHeightMap()
     );
 
-    terrainData_.colorMap =
-        std::vector<Color>(resolutionX_ * resolutionZ_);
-    terrainData_.rainMap = rainGenerator_.generateRainDrops(
-        terrainWorldSize_, rainDropsAmount_, terrainSeed_
+    rainGenerator_.generateRainDrops(
+        terrainWorldSize_,
+        rainDropsAmount_,
+        terrainSeed_,
+        terrainData_.getRainMap()
     );
 
     terrainRenderer_.setupModel(terrainData_, lightSourcePosition_);
@@ -66,7 +65,7 @@ void TerrainScene::renderUi() {
     );
 
     DrawText(
-        TextFormat("Vertices: %d", terrainData_.heightMap.size()),
+        TextFormat("Vertices: %d", terrainData_.getHeightMap().size()),
         leftMargin,
         fontSize + topMargin,
         fontSize,
@@ -74,7 +73,7 @@ void TerrainScene::renderUi() {
     );
 
     DrawText(
-        TextFormat("Rain drops: %d", terrainData_.rainMap.size()),
+        TextFormat("Rain drops: %d", terrainData_.getRainMap().size()),
         leftMargin,
         2 * fontSize + topMargin,
         fontSize,
@@ -117,7 +116,14 @@ TerrainScene::TerrainScene(
     terrainGenerator_(terrainGenerator),
     rainGenerator_(rainGenerator),
     terrainModifiers_(terrainModifiers),
-    terrainRenderer_(terrainRenderer) {}
+    terrainRenderer_(terrainRenderer),
+    terrainData_ {
+        resolutionX_,
+        resolutionZ_,
+        terrainWorldSize_,
+        terrainWorldPosition_,
+        rainDropsAmount_
+    } {}
 
 void TerrainScene::setup() {
     setupTerrain();

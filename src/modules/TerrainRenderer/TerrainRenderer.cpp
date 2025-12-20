@@ -8,15 +8,20 @@
 Image TerrainRenderer::convertToTextureImage(
     const TerrainData& terrainData
 ) {
-    assert(terrainData.resolutionX <= std::numeric_limits<int>::max());
-    assert(terrainData.resolutionZ <= std::numeric_limits<int>::max());
+    assert(
+        terrainData.getResolutionX() <= std::numeric_limits<int>::max()
+    );
+    assert(
+        terrainData.getResolutionZ() <= std::numeric_limits<int>::max()
+    );
 
     Image textureImage {
         .data = MemAlloc(
-            terrainData.resolutionX * terrainData.resolutionZ * 4
+            terrainData.getResolutionX() * terrainData.getResolutionZ() *
+            4
         ),
-        .width = static_cast<int>(terrainData.resolutionX),
-        .height = static_cast<int>(terrainData.resolutionZ),
+        .width = static_cast<int>(terrainData.getResolutionX()),
+        .height = static_cast<int>(terrainData.getResolutionZ()),
         .mipmaps = 1,
         .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
     };
@@ -24,10 +29,11 @@ Image TerrainRenderer::convertToTextureImage(
     uint8_t* textureImageData = static_cast<uint8_t*>(textureImage.data);
 
     // TODO use std::memcpy?
-    for (uint32_t y = 0; y < terrainData.resolutionZ; y++) {
-        for (uint32_t x = 0; x < terrainData.resolutionX; x++) {
-            const uint32_t pixelIndex = y * terrainData.resolutionX + x;
-            const Color pixelValue = terrainData.colorMap[pixelIndex];
+    for (uint32_t y = 0; y < terrainData.getResolutionZ(); y++) {
+        for (uint32_t x = 0; x < terrainData.getResolutionX(); x++) {
+            const uint32_t pixelIndex =
+                y * terrainData.getResolutionX() + x;
+            const Color pixelValue = terrainData.colorAt(pixelIndex);
 
             textureImageData[pixelIndex * 4 + 0] = pixelValue.r;
             textureImageData[pixelIndex * 4 + 1] = pixelValue.g;
@@ -91,6 +97,6 @@ void TerrainRenderer::renderModel(
         0
     );
 
-    UpdateTexture(terrainTexture_, terrainData.colorMap.data());
-    DrawModel(terrainModel_, terrainData.worldPosition, 1.0f, WHITE);
+    UpdateTexture(terrainTexture_, terrainData.getColorMap().data());
+    DrawModel(terrainModel_, terrainData.getWorldPosition(), 1.0f, WHITE);
 }

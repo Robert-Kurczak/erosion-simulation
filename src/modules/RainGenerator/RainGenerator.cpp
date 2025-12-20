@@ -2,15 +2,14 @@
 
 #include <FastNoiseLite.h>
 
-std::vector<RainDrop> RainGenerator::generateRainDrops(
+void RainGenerator::generateRainDrops(
     const Vector3& worldArea,
     uint32_t dropsAmount,
-    uint32_t seed
+    uint32_t seed,
+    std::span<RainDrop> outputBuffer
 ) {
     FastNoiseLite noiseGenerator {};
     noiseGenerator.SetSeed(seed);
-
-    std::vector<RainDrop> rainDrops(dropsAmount);
 
     for (uint32_t i = 0; i < dropsAmount; i++) {
         const float randomX =
@@ -31,8 +30,6 @@ std::vector<RainDrop> RainGenerator::generateRainDrops(
             .deposition = 0.0f
         };
 
-        rainDrops[i] = rainDrop;
+        outputBuffer[i] = rainDrop;
     }
-
-    return rainDrops;
 }
