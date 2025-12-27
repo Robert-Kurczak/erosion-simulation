@@ -1,6 +1,7 @@
 #include "HydraulicErosion.hpp"
 
 #include <functional>
+#include <iostream>
 #include <raymath.h>
 #include <stdint.h>
 
@@ -18,10 +19,23 @@ Vector2 HydraulicErosion::calculateGradient(
     const uint32_t x = indices.x;
     const uint32_t z = indices.y;
 
-    const double pointAHeight = terrainData.heightAt(x, z);
-    const double pointBHeight = terrainData.heightAt(x + 1, z);
-    const double pointCHeight = terrainData.heightAt(x, z + 1);
-    const double pointDHeight = terrainData.heightAt(x + 1, z + 1);
+    const bool isXAtBorder =
+        x <= 0 || x >= terrainData.getResolutionX() - 1;
+    const bool isZAtBorder =
+        z <= 0 || z >= terrainData.getResolutionZ() - 1;
+
+    if (isXAtBorder || isZAtBorder) {
+        return Vector2Zeros;
+    }
+
+    const double pointAHeight =
+        terrainData.heightAt(x, z) * terrainData.getWorldSize().y;
+    const double pointBHeight =
+        terrainData.heightAt(x + 1, z) * terrainData.getWorldSize().y;
+    const double pointCHeight =
+        terrainData.heightAt(x, z + 1) * terrainData.getWorldSize().y;
+    const double pointDHeight =
+        terrainData.heightAt(x + 1, z + 1) * terrainData.getWorldSize().y;
 
     const double slopeX1 = pointBHeight - pointAHeight;
     const double slopeX2 = pointDHeight - pointCHeight;
@@ -29,8 +43,7 @@ Vector2 HydraulicErosion::calculateGradient(
     const double slopeY2 = pointDHeight - pointBHeight;
 
     const Vector2 dropCoordInCell {
-        position.x - uint32_t(position.x),
-        position.y - uint32_t(position.y)
+        position.x - int32_t(position.x), position.y - int32_t(position.y)
     };
 
     const Vector2 gradient {
@@ -66,10 +79,11 @@ RainDrop HydraulicErosion::getDerivatives(
     // dv/dt = -g∇h(x, z) - v*n/m
 
     static const double g = 9.81;
-    static const double n = 1;
+    static const double n = 0.85;
     static const double m = 1;
 
     const Vector2 gradient = calculateGradient(position, terrainData);
+
     const Vector2 acceleration {
         float(-g * gradient.x - velocity.x * n / m),
         float(-g * gradient.y - velocity.y * n / m)
@@ -117,9 +131,37 @@ void HydraulicErosion::integrateStepRK4(
                      (timeStep / 6.0f);
 }
 
+void HydraulicErosion::resetDrop(
+    const BoundingBox& boundingBox,
+    RainDrop& drop
+) {
+    drop.worldPosition.x = randomNumberGenerator_.getRandomFloat(
+        boundingBox.min.x, boundingBox.max.x
+    );
+    drop.worldPosition.y = randomNumberGenerator_.getRandomFloat(
+        boundingBox.min.z, boundingBox.max.z
+    );
+    drop.velocity = Vector2Zeros;
+    drop.deposition = 0.0f;
+}
+
+HydraulicErosion::HydraulicErosion(
+    IRandomNumberGenerator& randomNumberGenerator
+) :
+    randomNumberGenerator_(randomNumberGenerator) {}
+
 void HydraulicErosion::modify(TerrainData& terrainData) {
     for (RainDrop& drop : terrainData.getRainMap()) {
-        integrateStepRK4(drop, terrainData, 0.1);
+        integrateStepRK4(drop, terrainData, GetFrameTime());
+
+        const bool validPosition =
+            terrainData.isInsideBoundingBox(drop.worldPosition);
+
+        const bool stillMoving = Vector2Length(drop.velocity) > 0;
+
+        if (!validPosition || !stillMoving) {
+            resetDrop(terrainData.getBoundingBox(), drop);
+        }
 
         terrainData.mutableColorAtWorld(drop.worldPosition) = RED;
     }

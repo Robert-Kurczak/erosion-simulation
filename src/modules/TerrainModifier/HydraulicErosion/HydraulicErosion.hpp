@@ -2,11 +2,14 @@
 
 #include "../ITerrainModifier.hpp"
 #include "RainGenerator/RainDrop.hpp"
+#include "RandomNumberGenerator/IRandomNumberGenerator.hpp"
 
 #include <vector>
 
 class HydraulicErosion : public ITerrainModifier {
 private:
+    IRandomNumberGenerator& randomNumberGenerator_;
+
     Vector2 calculateGradient(
         const Vector2& position,
         const TerrainData& terrainData
@@ -24,6 +27,10 @@ private:
         double timeStep
     );
 
+    void resetDrop(const BoundingBox& boundingBox, RainDrop& drop);
+
 public:
+    HydraulicErosion(IRandomNumberGenerator& randomNumberGenerator);
+
     virtual void modify(TerrainData& terrainData) override;
 };

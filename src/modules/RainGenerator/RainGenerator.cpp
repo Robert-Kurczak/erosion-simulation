@@ -1,25 +1,25 @@
 #include "RainGenerator.hpp"
 
-#include <FastNoiseLite.h>
+RainGenerator::RainGenerator(IRandomNumberGenerator& randomNumberGenerator
+) :
+    randomNumberGenerator_(randomNumberGenerator) {}
 
 void RainGenerator::generateRainDrops(
-    const Vector3& worldArea,
     uint32_t dropsAmount,
     uint32_t seed,
+    const BoundingBox& boundingBox,
     std::span<RainDrop> outputBuffer
 ) {
-    FastNoiseLite noiseGenerator {};
-    noiseGenerator.SetSeed(seed);
+    randomNumberGenerator_.setSeed(seed);
 
     for (uint32_t i = 0; i < dropsAmount; i++) {
-        const float randomX =
-            (noiseGenerator.GetNoise(float(i), 0.0f) + 1.0) / 2.0f;
-
-        const float randomZ =
-            (noiseGenerator.GetNoise(0.0f, float(i)) + 1.0) / 2.0f;
-
         const Vector2 position {
-            randomX * worldArea.x, randomZ * worldArea.z
+            randomNumberGenerator_.getRandomFloat(
+                boundingBox.min.x, boundingBox.max.x
+            ),
+            randomNumberGenerator_.getRandomFloat(
+                boundingBox.min.z, boundingBox.max.z
+            ),
         };
 
         const Vector2 velocity {0, 0};

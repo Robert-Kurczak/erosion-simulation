@@ -3,6 +3,7 @@
 #include "InputController/KeyboardInputController.hpp"
 #include "MeshGenerator/MeshGenerator.hpp"
 #include "RainGenerator/RainGenerator.hpp"
+#include "RandomNumberGenerator/RaylibNumberGenerator/RaylibNumberGenerator.hpp"
 #include "Scene/TerrainScene/TerrainScene.hpp"
 #include "TerrainGenerator/PerlinNoiseTerrainGenerator/PerlinNoiseTerrainGenerator.hpp"
 #include "TerrainModifier/HydraulicErosion/HydraulicErosion.hpp"
@@ -23,10 +24,13 @@ KeyboardInputController keyboardInputController_ {};
 
 PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
-RainGenerator rainGenerator_ {};
+RaylibNumberGenerator randomNumberGenerator_ {};
+
+RainGenerator rainGenerator_ {randomNumberGenerator_};
 
 TerrainPainter terrainPainter_ {};
-HydraulicErosion hydraulicErosion_ {};
+
+HydraulicErosion hydraulicErosion_ {randomNumberGenerator_};
 
 const std::vector<ITerrainModifier*> terrainModifiers_ {
     &terrainPainter_,

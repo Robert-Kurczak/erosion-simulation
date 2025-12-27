@@ -26,7 +26,7 @@ private:
     const uint32_t resolutionZ_ = 1024;
     const Vector3 terrainWorldSize_ {256.0f, 128.0f, 256.0f};
     const Vector3 terrainWorldPosition_ {0.0f, 0.0f, 0.0f};
-    const uint32_t rainDropsAmount_ = 3000;
+    const uint32_t rainDropsAmount_ = 100000;
     uint32_t terrainSeed_ = 20;
     TerrainData terrainData_;
 

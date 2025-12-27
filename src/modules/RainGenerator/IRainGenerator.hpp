@@ -11,9 +11,9 @@ public:
     virtual ~IRainGenerator() = default;
 
     virtual void generateRainDrops(
-        const Vector3& worldArea,
         uint32_t dropsAmount,
         uint32_t seed,
+        const BoundingBox& boundingBox,
         std::span<RainDrop> outputBuffer
     ) = 0;
 };
