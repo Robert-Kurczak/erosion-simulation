@@ -60,7 +60,7 @@ Vector2 HydraulicErosion::calculateGradient(
     return gradient;
 }
 
-RainDrop HydraulicErosion::getDerivatives(
+WaterDroplet HydraulicErosion::getDerivatives(
     const Vector2& position,
     const Vector2& velocity,
     const TerrainData& terrainData
@@ -89,60 +89,48 @@ RainDrop HydraulicErosion::getDerivatives(
         float(-g * gradient.y - velocity.y * n / m)
     };
 
-    return RainDrop {
-        .worldPosition = velocity,
-        .velocity = acceleration,
-        .deposition = 0.0f
-    };
+    return WaterDroplet {velocity, acceleration, 0.0f, 0.0f};
 }
 
 void HydraulicErosion::integrateStepRK4(
-    RainDrop& drop,
+    WaterDroplet& droplet,
     const TerrainData& terrainData,
     double timeStep
 ) {
-    const RainDrop k1 =
-        getDerivatives(drop.worldPosition, drop.velocity, terrainData);
+    const WaterDroplet k1 = getDerivatives(
+        droplet.getPosition(), droplet.getVelocity(), terrainData
+    );
 
-    const RainDrop k2 = getDerivatives(
-        drop.worldPosition + (k1.worldPosition * timeStep / 2.0f),
-        drop.velocity + (k1.velocity * timeStep / 2.0f),
+    const WaterDroplet k2 = getDerivatives(
+        droplet.getPosition() + (k1.getPosition() * timeStep / 2.0f),
+        droplet.getVelocity() + (k1.getVelocity() * timeStep / 2.0f),
         terrainData
     );
 
-    const RainDrop k3 = getDerivatives(
-        drop.worldPosition + (k2.worldPosition * timeStep / 2.0f),
-        drop.velocity + (k2.velocity * timeStep / 2.0f),
+    const WaterDroplet k3 = getDerivatives(
+        droplet.getPosition() + (k2.getPosition() * timeStep / 2.0f),
+        droplet.getVelocity() + (k2.getVelocity() * timeStep / 2.0f),
         terrainData
     );
 
-    const RainDrop k4 = getDerivatives(
-        drop.worldPosition + (k3.worldPosition * timeStep),
-        drop.velocity + (k3.velocity * timeStep),
+    const WaterDroplet k4 = getDerivatives(
+        droplet.getPosition() + (k3.getPosition() * timeStep),
+        droplet.getVelocity() + (k3.getVelocity() * timeStep),
         terrainData
     );
 
-    drop.worldPosition += (k1.worldPosition + (k2.worldPosition * 2) +
-                           (k3.worldPosition * 2) + k4.worldPosition) *
-                          (timeStep / 6.0f);
+    const Vector2 deltaPosition =
+        (k1.getPosition() + (k2.getPosition() * 2) +
+         (k3.getPosition() * 2) + k4.getPosition()) *
+        (timeStep / 6.0f);
 
-    drop.velocity += (k1.velocity + (k2.velocity * 2) +
-                      (k3.velocity * 2) + k4.velocity) *
-                     (timeStep / 6.0f);
-}
+    const Vector2 deltaVelocity =
+        (k1.getVelocity() + (k2.getVelocity() * 2) +
+         (k3.getVelocity() * 2) + k4.getVelocity()) *
+        (timeStep / 6.0f);
 
-void HydraulicErosion::resetDrop(
-    const BoundingBox& boundingBox,
-    RainDrop& drop
-) {
-    drop.worldPosition.x = randomNumberGenerator_.getRandomFloat(
-        boundingBox.min.x, boundingBox.max.x
-    );
-    drop.worldPosition.y = randomNumberGenerator_.getRandomFloat(
-        boundingBox.min.z, boundingBox.max.z
-    );
-    drop.velocity = Vector2Zeros;
-    drop.deposition = 0.0f;
+    droplet.addPosition(deltaPosition);
+    droplet.addVelocity(deltaVelocity);
 }
 
 HydraulicErosion::HydraulicErosion(
@@ -151,18 +139,20 @@ HydraulicErosion::HydraulicErosion(
     randomNumberGenerator_(randomNumberGenerator) {}
 
 void HydraulicErosion::modify(TerrainData& terrainData) {
-    for (RainDrop& drop : terrainData.getRainMap()) {
-        integrateStepRK4(drop, terrainData, GetFrameTime());
+    for (WaterDroplet& droplet : terrainData.getRainMap()) {
+        integrateStepRK4(droplet, terrainData, GetFrameTime());
 
         const bool validPosition =
-            terrainData.isInsideBoundingBox(drop.worldPosition);
+            terrainData.isInsideBoundingBox(droplet.getPosition());
 
-        const bool stillMoving = Vector2Length(drop.velocity) > 0;
+        const bool stillMoving = Vector2Length(droplet.getVelocity()) > 0;
 
         if (!validPosition || !stillMoving) {
-            resetDrop(terrainData.getBoundingBox(), drop);
+            droplet.randomizeParameters(
+                randomNumberGenerator_, terrainData.getBoundingBox()
+            );
         }
 
-        terrainData.mutableColorAtWorld(drop.worldPosition) = RED;
+        terrainData.mutableColorAtWorld(droplet.getPosition()) = RED;
     }
 }

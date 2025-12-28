@@ -62,11 +62,11 @@ std::vector<Color>& TerrainData::getColorMap() {
     return colorMap_;
 }
 
-const std::vector<RainDrop>& TerrainData::getRainMap() const {
+const std::vector<WaterDroplet>& TerrainData::getRainMap() const {
     return rainMap_;
 }
 
-std::vector<RainDrop>& TerrainData::getRainMap() {
+std::vector<WaterDroplet>& TerrainData::getRainMap() {
     return rainMap_;
 }
 

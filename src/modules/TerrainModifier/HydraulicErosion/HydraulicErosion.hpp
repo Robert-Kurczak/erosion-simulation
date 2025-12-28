@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../ITerrainModifier.hpp"
-#include "RainGenerator/RainDrop.hpp"
 #include "RandomNumberGenerator/IRandomNumberGenerator.hpp"
+#include "WaterDroplet/WaterDroplet.hpp"
 
 #include <vector>
 
@@ -15,19 +15,17 @@ private:
         const TerrainData& terrainData
     ) const;
 
-    RainDrop getDerivatives(
+    WaterDroplet getDerivatives(
         const Vector2& position,
         const Vector2& velocity,
         const TerrainData& terrainData
     );
 
     void integrateStepRK4(
-        RainDrop& drop,
+        WaterDroplet& droplet,
         const TerrainData& terrainData,
         double timeStep
     );
-
-    void resetDrop(const BoundingBox& boundingBox, RainDrop& drop);
 
 public:
     HydraulicErosion(IRandomNumberGenerator& randomNumberGenerator);

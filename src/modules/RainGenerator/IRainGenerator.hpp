@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RainDrop.hpp"
+#include "WaterDroplet/WaterDroplet.hpp"
 
 #include <raylib.h>
 #include <span>
@@ -11,9 +11,7 @@ public:
     virtual ~IRainGenerator() = default;
 
     virtual void generateRainDrops(
-        uint32_t dropsAmount,
-        uint32_t seed,
         const BoundingBox& boundingBox,
-        std::span<RainDrop> outputBuffer
+        std::span<WaterDroplet> outputBuffer
     ) = 0;
 };

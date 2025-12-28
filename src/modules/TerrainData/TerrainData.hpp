@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RainGenerator/RainDrop.hpp"
+#include "WaterDroplet/WaterDroplet.hpp"
 
 #include <assert.h>
 #include <raylib.h>
@@ -17,7 +17,7 @@ private:
 
     std::vector<double> heightMap_;
     std::vector<Color> colorMap_;
-    std::vector<RainDrop> rainMap_;
+    std::vector<WaterDroplet> rainMap_;
 
 public:
     TerrainData(
@@ -41,8 +41,8 @@ public:
     const std::vector<Color>& getColorMap() const;
     std::vector<Color>& getColorMap();
 
-    const std::vector<RainDrop>& getRainMap() const;
-    std::vector<RainDrop>& getRainMap();
+    const std::vector<WaterDroplet>& getRainMap() const;
+    std::vector<WaterDroplet>& getRainMap();
 
     bool isInsideBoundingBox(const Vector2& worldPosition) const;
 

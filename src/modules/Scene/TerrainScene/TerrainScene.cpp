@@ -12,10 +12,7 @@ void TerrainScene::setupTerrain() {
     );
 
     rainGenerator_.generateRainDrops(
-        rainDropsAmount_,
-        terrainSeed_,
-        terrainData_.getBoundingBox(),
-        terrainData_.getRainMap()
+        terrainData_.getBoundingBox(), terrainData_.getRainMap()
     );
 
     terrainRenderer_.setupModel(terrainData_, lightSourcePosition_);

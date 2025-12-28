@@ -11,9 +11,7 @@ public:
     RainGenerator(IRandomNumberGenerator& randomNumberGenerator);
 
     virtual void generateRainDrops(
-        uint32_t dropsAmount,
-        uint32_t seed,
         const BoundingBox& boundingBox,
-        std::span<RainDrop> outputBuffer
+        std::span<WaterDroplet> outputBuffer
     ) override;
 };
