@@ -20,13 +20,18 @@ Vector2 HydraulicErosion::calculateGradient(
     const uint32_t z = indices.y;
 
     const bool isXAtBorder =
-        x <= 0 || x >= terrainData.getResolutionX() - 1;
+        x == 0 || x >= terrainData.getResolutionX() - 1;
     const bool isZAtBorder =
-        z <= 0 || z >= terrainData.getResolutionZ() - 1;
+        z == 0 || z >= terrainData.getResolutionZ() - 1;
 
     if (isXAtBorder || isZAtBorder) {
         return Vector2Zeros;
     }
+
+    const float cellSizeX =
+        terrainData.getWorldSize().x / terrainData.getResolutionX();
+    const float cellSizeZ =
+        terrainData.getWorldSize().z / terrainData.getResolutionZ();
 
     const double pointAHeight =
         terrainData.heightAt(x, z) * terrainData.getWorldSize().y;
@@ -37,13 +42,17 @@ Vector2 HydraulicErosion::calculateGradient(
     const double pointDHeight =
         terrainData.heightAt(x + 1, z + 1) * terrainData.getWorldSize().y;
 
-    const double slopeX1 = pointBHeight - pointAHeight;
-    const double slopeX2 = pointDHeight - pointCHeight;
-    const double slopeY1 = pointCHeight - pointAHeight;
-    const double slopeY2 = pointDHeight - pointBHeight;
+    const double slopeX1 = (pointBHeight - pointAHeight) / cellSizeX;
+    const double slopeX2 = (pointDHeight - pointCHeight) / cellSizeX;
+    const double slopeY1 = (pointCHeight - pointAHeight) / cellSizeZ;
+    const double slopeY2 = (pointDHeight - pointBHeight) / cellSizeZ;
+
+    const Vector2 floatIndices =
+        terrainData.worldPositionToFloatIndices(position);
 
     const Vector2 dropCoordInCell {
-        position.x - int32_t(position.x), position.y - int32_t(position.y)
+        floatIndices.x - int32_t(floatIndices.x),
+        floatIndices.y - int32_t(floatIndices.y)
     };
 
     const Vector2 gradient {
@@ -92,10 +101,10 @@ WaterDroplet HydraulicErosion::getDerivatives(
     return WaterDroplet {velocity, acceleration, 0.0f, 0.0f};
 }
 
-void HydraulicErosion::integrateStepRK4(
-    WaterDroplet& droplet,
+WaterDroplet HydraulicErosion::getNextDropletState(
+    const WaterDroplet& droplet,
     const TerrainData& terrainData,
-    double timeStep
+    float timeStep
 ) {
     const WaterDroplet k1 = getDerivatives(
         droplet.getPosition(), droplet.getVelocity(), terrainData
@@ -129,8 +138,121 @@ void HydraulicErosion::integrateStepRK4(
          (k3.getVelocity() * 2) + k4.getVelocity()) *
         (timeStep / 6.0f);
 
-    droplet.addPosition(deltaPosition);
-    droplet.addVelocity(deltaVelocity);
+    const float waterToEvaporate =
+        droplet.getWaterAmount() * EVAPORATION_RATE_ * timeStep;
+
+    WaterDroplet nextState = droplet;
+    nextState.addPosition(deltaPosition);
+    nextState.addVelocity(deltaVelocity);
+    nextState.addWater(-waterToEvaporate);
+
+    return nextState;
+}
+
+void HydraulicErosion::transformWithBrush(
+    const Vector2& worldPosition,
+    float delta,
+    TerrainData& terrainData
+) {
+    const Vector2 indices =
+        terrainData.worldPositionToIndices(worldPosition);
+    const uint32_t x = indices.x;
+    const uint32_t z = indices.y;
+
+    const int8_t brushRadius = BRUSH_WEIGHTS_.size() / 2;
+
+    for (int8_t brushZ = -brushRadius; brushZ < brushRadius; brushZ++) {
+        for (int8_t brushX = -brushRadius; brushX < brushRadius;
+             brushX++) {
+            const uint32_t neighborX = x + brushX;
+            const uint32_t neighborZ = z + brushZ;
+
+            if (!terrainData.isInsideHeightMap(neighborX, neighborZ)) {
+                continue;
+            }
+
+            terrainData.mutableHeightAt(neighborX, neighborZ) +=
+                delta * BRUSH_WEIGHTS_.at(brushZ + brushRadius)
+                            .at(brushX + brushRadius);
+        }
+    }
+}
+
+void HydraulicErosion::moveSedimentDown(
+    const WaterDroplet& previousState,
+    WaterDroplet& nextState,
+    TerrainData& terrainData,
+    float deltaHeight,
+    float deltaTime
+) {
+    const float capacity = -deltaHeight *
+                           Vector2Length(nextState.getVelocity()) *
+                           nextState.getWaterAmount() * CAPACITY_FACTOR_;
+
+    if (nextState.getSedimentAmount() > capacity) {
+        const float sedimentToDeposit =
+            (nextState.getSedimentAmount() - capacity) *
+            DEPOSITION_RATE_ * deltaTime;
+
+        transformWithBrush(
+            previousState.getPosition(), sedimentToDeposit, terrainData
+        );
+
+        nextState.addSediment(-sedimentToDeposit);
+    } else {
+        float sedimentToErode =
+            (capacity - nextState.getSedimentAmount()) * EROSION_RATE_ *
+            deltaTime;
+
+        sedimentToErode = Clamp(sedimentToErode, 0.0f, -deltaHeight);
+
+        transformWithBrush(
+            previousState.getPosition(), -sedimentToErode, terrainData
+        );
+
+        nextState.addSediment(sedimentToErode);
+    }
+}
+
+void HydraulicErosion::moveSedimentUp(
+    const WaterDroplet& previousState,
+    WaterDroplet& nextState,
+    TerrainData& terrainData,
+    float deltaHeight
+) {
+    const float sedimentToDeposit =
+        Clamp(nextState.getSedimentAmount(), 0, deltaHeight);
+
+    transformWithBrush(
+        previousState.getPosition(), sedimentToDeposit, terrainData
+    );
+
+    nextState.addSediment(-sedimentToDeposit);
+}
+
+void HydraulicErosion::transportSediment(
+    const WaterDroplet& previousState,
+    WaterDroplet& nextState,
+    TerrainData& terrainData,
+    float deltaTime
+) {
+    const double previousHeight =
+        terrainData.heightAtWorld(previousState.getPosition());
+
+    const double nextHeight =
+        terrainData.heightAtWorld(nextState.getPosition());
+
+    const double deltaHeight = nextHeight - previousHeight;
+
+    if (deltaHeight < 0) {
+        moveSedimentDown(
+            previousState, nextState, terrainData, deltaHeight, deltaTime
+        );
+    } else {
+        moveSedimentUp(
+            previousState, nextState, terrainData, deltaHeight
+        );
+    }
 }
 
 HydraulicErosion::HydraulicErosion(
@@ -139,20 +261,29 @@ HydraulicErosion::HydraulicErosion(
     randomNumberGenerator_(randomNumberGenerator) {}
 
 void HydraulicErosion::modify(TerrainData& terrainData) {
+    const float deltaTime = GetFrameTime();
+
     for (WaterDroplet& droplet : terrainData.getRainMap()) {
-        integrateStepRK4(droplet, terrainData, GetFrameTime());
+        WaterDroplet nextState =
+            getNextDropletState(droplet, terrainData, deltaTime);
 
         const bool validPosition =
-            terrainData.isInsideBoundingBox(droplet.getPosition());
+            terrainData.isInsideBoundingBox(nextState.getPosition());
 
-        const bool stillMoving = Vector2Length(droplet.getVelocity()) > 0;
+        const bool stillMoving =
+            Vector2LengthSqr(nextState.getVelocity()) > 1.0f;
 
-        if (!validPosition || !stillMoving) {
+        const bool haveWater = nextState.getWaterAmount() > 0.1f;
+
+        if (validPosition && stillMoving && haveWater) {
+            transportSediment(droplet, nextState, terrainData, deltaTime);
+            droplet = nextState;
+        } else {
             droplet.randomizeParameters(
                 randomNumberGenerator_, terrainData.getBoundingBox()
             );
         }
 
-        terrainData.mutableColorAtWorld(droplet.getPosition()) = RED;
+        // terrainData.mutableColorAtWorld(droplet.getPosition()) = RED;
     }
 }

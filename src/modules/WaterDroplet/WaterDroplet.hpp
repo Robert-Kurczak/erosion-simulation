@@ -24,9 +24,13 @@ public:
 
     const Vector2& getPosition() const;
     const Vector2& getVelocity() const;
+    float getWaterAmount() const;
+    float getSedimentAmount() const;
 
     void addPosition(const Vector2& delta);
     void addVelocity(const Vector2& delta);
+    void addWater(float delta);
+    void addSediment(float delta);
 
     void randomizePosition(
         IRandomNumberGenerator& randomNumberGenerator,

@@ -23,6 +23,14 @@ const Vector2& WaterDroplet::getVelocity() const {
     return velocity_;
 }
 
+float WaterDroplet::getWaterAmount() const {
+    return waterAmount_;
+}
+
+float WaterDroplet::getSedimentAmount() const {
+    return sedimentAmount_;
+}
+
 void WaterDroplet::addPosition(const Vector2& delta) {
     position_.x += delta.x;
     position_.y += delta.y;
@@ -31,6 +39,14 @@ void WaterDroplet::addPosition(const Vector2& delta) {
 void WaterDroplet::addVelocity(const Vector2& delta) {
     velocity_.x += delta.x;
     velocity_.y += delta.y;
+}
+
+void WaterDroplet::addWater(float delta) {
+    waterAmount_ += delta;
+}
+
+void WaterDroplet::addSediment(float delta) {
+    sedimentAmount_ += delta;
 }
 
 void WaterDroplet::randomizePosition(
@@ -61,7 +77,7 @@ void WaterDroplet::randomizeVelocity(
 void WaterDroplet::randomizeWaterAmount(
     IRandomNumberGenerator& randomNumberGenerator
 ) {
-    waterAmount_ = randomNumberGenerator.getRandomFloat(0, 1);
+    waterAmount_ = randomNumberGenerator.getRandomFloat();
 }
 
 void WaterDroplet::randomizeParameters(

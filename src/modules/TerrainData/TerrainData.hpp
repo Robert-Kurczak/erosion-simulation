@@ -44,13 +44,18 @@ public:
     const std::vector<WaterDroplet>& getRainMap() const;
     std::vector<WaterDroplet>& getRainMap();
 
+    bool isInsideHeightMap(uint32_t x, uint32_t z) const;
     bool isInsideBoundingBox(const Vector2& worldPosition) const;
 
     Vector2 worldPositionToIndices(const Vector2& worldPosition) const;
+    Vector2 worldPositionToFloatIndices(const Vector2& worldPosition) const;
     Vector2 indicesToWorldPosition(uint32_t x, uint32_t z) const;
 
     double heightAt(uint32_t index) const;
     double heightAt(uint32_t x, uint32_t z) const;
+    double heightAtWorld(const Vector2& worldPosition) const;
+    double& mutableHeightAt(uint32_t x, uint32_t z);
+    double& mutableHeightAtWorld(const Vector2& worldPosition);
 
     Color colorAt(uint32_t index) const;
     Color colorAt(uint32_t x, uint32_t z) const;

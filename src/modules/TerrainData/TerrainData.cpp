@@ -70,6 +70,10 @@ std::vector<WaterDroplet>& TerrainData::getRainMap() {
     return rainMap_;
 }
 
+bool TerrainData::isInsideHeightMap(uint32_t x, uint32_t z) const {
+    return x <= resolutionX_ - 1 && z <= resolutionZ_ - 1;
+}
+
 bool TerrainData::isInsideBoundingBox(const Vector2& worldPosition
 ) const {
     const bool withinLeftBorder = worldPosition.x >= boundingBox_.min.x;
@@ -91,6 +95,15 @@ Vector2 TerrainData::worldPositionToIndices(const Vector2& worldPosition
     return Vector2 {float(x), float(z)};
 }
 
+Vector2 TerrainData::worldPositionToFloatIndices(
+    const Vector2& worldPosition
+) const {
+    return Vector2 {
+        (worldPosition.x / worldSize_.x + 0.5f) * (resolutionX_ - 1),
+        (worldPosition.y / worldSize_.z + 0.5f) * (resolutionZ_ - 1)
+    };
+}
+
 Vector2 TerrainData::indicesToWorldPosition(uint32_t x, uint32_t z)
     const {
     return Vector2 {
@@ -106,9 +119,25 @@ double TerrainData::heightAt(uint32_t index) const {
 }
 
 double TerrainData::heightAt(uint32_t x, uint32_t z) const {
-    assert(x <= resolutionX_ - 1 && z <= resolutionZ_ - 1);
+    assert(isInsideHeightMap(x, z));
 
     return heightMap_[z * resolutionX_ + x];
+}
+
+double TerrainData::heightAtWorld(const Vector2& worldPosition) const {
+    const Vector2 indices = worldPositionToIndices(worldPosition);
+    return heightAt(indices.x, indices.y);
+}
+
+double& TerrainData::mutableHeightAt(uint32_t x, uint32_t z) {
+    assert(isInsideHeightMap(x, z));
+
+    return heightMap_[z * resolutionX_ + x];
+}
+
+double& TerrainData::mutableHeightAtWorld(const Vector2& worldPosition) {
+    const Vector2 indices = worldPositionToIndices(worldPosition);
+    return mutableHeightAt(indices.x, indices.y);
 }
 
 Color TerrainData::colorAt(uint32_t index) const {
@@ -118,16 +147,14 @@ Color TerrainData::colorAt(uint32_t index) const {
 }
 
 Color TerrainData::colorAt(uint32_t x, uint32_t z) const {
-    assert(x <= resolutionX_ - 1 && z <= resolutionZ_ - 1);
+    assert(isInsideHeightMap(x, z));
 
     return colorMap_[z * resolutionX_ + x];
 }
 
 Color& TerrainData::mutableColorAtWorld(const Vector2& worldPosition) {
     const Vector2 indices = worldPositionToIndices(worldPosition);
-    assert(
-        indices.x <= resolutionX_ - 1 && indices.y <= resolutionZ_ - 1
-    );
+    assert(isInsideHeightMap(indices.x, indices.x));
 
     return colorMap_[indices.y * resolutionX_ + indices.x];
 }
