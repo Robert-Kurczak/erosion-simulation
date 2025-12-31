@@ -15,4 +15,11 @@ public:
     virtual bool isActionPressed(InputAction action) const override;
     virtual bool isActionReleased(InputAction action) const override;
     virtual float getActionValue(InputAction action) const override;
+
+    virtual const std::unordered_map<InputAction, InputBinding>&
+    getBindings() const override;
+    virtual std::string_view getActionName(InputAction action
+    ) const override;
+    virtual std::string_view getBindingName(const InputBinding& binding
+    ) const override;
 };

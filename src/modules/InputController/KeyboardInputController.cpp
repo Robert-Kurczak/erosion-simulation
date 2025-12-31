@@ -75,3 +75,41 @@ float KeyboardInputController::getActionValue(InputAction action) const {
 
     return 0.0f;
 }
+
+const std::unordered_map<InputAction, InputBinding>&
+KeyboardInputController::getBindings() const {
+    return ACTION_BINDINGS_;
+}
+
+std::string_view KeyboardInputController::getActionName(InputAction action
+) const {
+    switch (action) {
+    case InputAction::RegenerateTerrain:
+        return "Regenerate terrain";
+    case InputAction::LookAround:
+        return "Look around";
+    case InputAction::CameraZoom:
+        return "Camera zoom";
+    default:
+        return "Unknown action";
+    }
+}
+
+std::string_view KeyboardInputController::getBindingName(
+    const InputBinding& binding
+) const {
+    switch (binding.source) {
+    case (InputSource::Keyboard):
+        return GetKeyName(binding.key);
+    case (InputSource::MouseButton):
+        if (binding.key == 0) {
+            return "Left mouse button";
+        }
+        return "Right mouse button";
+
+    case (InputSource::MouseWheel):
+        return "Mouse wheel";
+    default:
+        return "Unknown source";
+    }
+}

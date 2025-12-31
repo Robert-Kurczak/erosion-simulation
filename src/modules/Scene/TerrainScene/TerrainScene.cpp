@@ -47,6 +47,33 @@ void TerrainScene::renderModels() {
     terrainRenderer_.renderModel(terrainData_, lightSourcePosition_);
 }
 
+void TerrainScene::drawKeybinds(
+    uint8_t fontSize,
+    const Color& fontColor,
+    const Vector2& margins
+) {
+    uint32_t counter = 0;
+    for (const auto& actionBinding : inputController_.getBindings()) {
+        const InputAction& action = actionBinding.first;
+        const InputBinding& binding = actionBinding.second;
+
+        const std::string_view actionName =
+            inputController_.getActionName(action);
+        const std::string_view bindingName =
+            inputController_.getBindingName(binding);
+
+        DrawText(
+            TextFormat("%s - %s", actionName.data(), bindingName.data()),
+            margins.x,
+            fontSize * counter + margins.y,
+            fontSize,
+            fontColor
+        );
+
+        counter++;
+    }
+}
+
 void TerrainScene::renderUi() {
     const Color fontColor = WHITE;
     const uint8_t fontSize = 30;
@@ -76,6 +103,8 @@ void TerrainScene::renderUi() {
         fontSize,
         fontColor
     );
+
+    drawKeybinds(fontSize, WHITE, {10.0f, 5 * fontSize + topMargin});
 }
 
 void TerrainScene::handleInput() {

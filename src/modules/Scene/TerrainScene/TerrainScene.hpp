@@ -35,6 +35,11 @@ private:
     void setCameraZoom(float zoom);
 
     void renderModels();
+    void drawKeybinds(
+        uint8_t fontSize,
+        const Color& fontColor,
+        const Vector2& margins
+    );
     void renderUi();
     void handleInput();
 
