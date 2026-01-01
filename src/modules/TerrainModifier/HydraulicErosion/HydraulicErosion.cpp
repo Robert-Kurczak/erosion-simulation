@@ -255,12 +255,29 @@ void HydraulicErosion::transportSediment(
     }
 }
 
+void HydraulicErosion::drawDroplet(
+    const WaterDroplet& droplet,
+    TerrainData& terrainData
+) {
+    const Color dropletColor {60, 139, 156, 80};
+    Color& currentColor =
+        terrainData.mutableColorAtWorld(droplet.getPosition());
+
+    currentColor = ColorAlphaBlend(currentColor, dropletColor, WHITE);
+}
+
 HydraulicErosion::HydraulicErosion(
-    IRandomNumberGenerator& randomNumberGenerator
+    IRandomNumberGenerator& randomNumberGenerator,
+    IInputController& inputController
 ) :
-    randomNumberGenerator_(randomNumberGenerator) {}
+    randomNumberGenerator_(randomNumberGenerator),
+    inputController_(inputController) {}
 
 void HydraulicErosion::modify(TerrainData& terrainData) {
+    if (inputController_.isActionReleased(InputAction::DrawRain)) {
+        drawRain = !drawRain;
+    }
+
     const float deltaTime = GetFrameTime();
 
     for (WaterDroplet& droplet : terrainData.getRainMap()) {
@@ -284,6 +301,8 @@ void HydraulicErosion::modify(TerrainData& terrainData) {
             );
         }
 
-        // terrainData.mutableColorAtWorld(droplet.getPosition()) = RED;
+        if (drawRain) {
+            drawDroplet(droplet, terrainData);
+        }
     }
 }

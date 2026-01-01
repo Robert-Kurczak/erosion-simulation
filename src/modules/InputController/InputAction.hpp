@@ -2,4 +2,9 @@
 
 #include <string_view>
 
-enum class InputAction { RegenerateTerrain, LookAround, CameraZoom };
+enum class InputAction {
+    RegenerateTerrain,
+    LookAround,
+    CameraZoom,
+    DrawRain
+};

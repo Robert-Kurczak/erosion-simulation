@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../ITerrainModifier.hpp"
+#include "InputController/IInputController.hpp"
 #include "RandomNumberGenerator/IRandomNumberGenerator.hpp"
 #include "WaterDroplet/WaterDroplet.hpp"
 
@@ -23,6 +24,9 @@ private:
     };
 
     IRandomNumberGenerator& randomNumberGenerator_;
+    IInputController& inputController_;
+
+    bool drawRain = false;
 
     Vector2 calculateGradient(
         const Vector2& position,
@@ -69,8 +73,16 @@ private:
         float deltaTime
     );
 
+    void drawDroplet(
+        const WaterDroplet& droplet,
+        TerrainData& terrainData
+    );
+
 public:
-    HydraulicErosion(IRandomNumberGenerator& randomNumberGenerator);
+    HydraulicErosion(
+        IRandomNumberGenerator& randomNumberGenerator,
+        IInputController& inputController
+    );
 
     virtual void modify(TerrainData& terrainData) override;
 };

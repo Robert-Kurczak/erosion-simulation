@@ -20,7 +20,7 @@ ApplicationConfig applicationConfig_ {
     .framesPerSeconds = 120
 };
 
-KeyboardInputController keyboardInputController_ {};
+KeyboardInputController inputController_ {};
 
 PerlinNoiseTerrainGenerator terrainGenerator_ {};
 
@@ -30,7 +30,10 @@ RainGenerator rainGenerator_ {randomNumberGenerator_};
 
 TerrainPainter terrainPainter_ {};
 
-HydraulicErosion hydraulicErosion_ {randomNumberGenerator_};
+HydraulicErosion hydraulicErosion_ {
+    randomNumberGenerator_,
+    inputController_
+};
 
 const std::vector<ITerrainModifier*> terrainModifiers_ {
     &terrainPainter_,
@@ -42,7 +45,7 @@ MeshGenerator meshGenerator_ {};
 TerrainRenderer terrainRenderer_ {meshGenerator_};
 
 TerrainScene terrainScene_ {
-    keyboardInputController_,
+    inputController_,
     terrainGenerator_,
     rainGenerator_,
     terrainModifiers_,

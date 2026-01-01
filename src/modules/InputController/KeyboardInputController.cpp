@@ -5,6 +5,7 @@
 const std::unordered_map<InputAction, InputBinding>
     KeyboardInputController::ACTION_BINDINGS_ {
         {InputAction::RegenerateTerrain, {InputSource::Keyboard, KEY_R}     },
+        {InputAction::DrawRain,          {InputSource::Keyboard, KEY_D}     },
         {InputAction::LookAround,
          {InputSource::MouseButton, MOUSE_BUTTON_LEFT}                      },
         {InputAction::CameraZoom,        {InputSource::MouseWheel, KEY_NULL}},
@@ -90,6 +91,8 @@ std::string_view KeyboardInputController::getActionName(InputAction action
         return "Look around";
     case InputAction::CameraZoom:
         return "Camera zoom";
+    case InputAction::DrawRain:
+        return "Draw rain";
     default:
         return "Unknown action";
     }
