@@ -30,6 +30,8 @@ private:
     uint32_t terrainSeed_ = 20;
     TerrainData terrainData_;
 
+    bool simulationStarted_ = false;
+
     void setupCamera();
     void setupTerrain();
     void setCameraZoom(float zoom);

@@ -4,6 +4,8 @@
 
 enum class InputAction {
     RegenerateTerrain,
+    ResetScene,
+    StartSimulation,
     LookAround,
     CameraZoom,
     DrawRain

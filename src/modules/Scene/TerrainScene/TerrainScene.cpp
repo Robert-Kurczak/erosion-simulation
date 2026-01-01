@@ -16,6 +16,10 @@ void TerrainScene::setupTerrain() {
     );
 
     terrainRenderer_.setupModel(terrainData_, lightSourcePosition_);
+
+    for (const auto& modifier : terrainModifiers_) {
+        modifier->modify(terrainData_);
+    }
 }
 
 void TerrainScene::setupCamera() {
@@ -32,19 +36,22 @@ void TerrainScene::setCameraZoom(float zoom) {
     );
 
     const Vector3 zoomVector =
-        Vector3Scale(cameraDirection, zoom * zoomSpeed_);
+        Vector3Scale(cameraDirection, -zoom * zoomSpeed_);
 
     mainCamera_.position = Vector3Add(mainCamera_.position, zoomVector);
 }
 
 void TerrainScene::renderModels() {
     ClearBackground(BLACK);
+    terrainRenderer_.renderModel(terrainData_, lightSourcePosition_);
+
+    if (!simulationStarted_) {
+        return;
+    }
 
     for (const auto& modifier : terrainModifiers_) {
         modifier->modify(terrainData_);
     }
-
-    terrainRenderer_.renderModel(terrainData_, lightSourcePosition_);
 }
 
 void TerrainScene::drawKeybinds(
@@ -108,14 +115,25 @@ void TerrainScene::renderUi() {
 }
 
 void TerrainScene::handleInput() {
+    if (inputController_.isActionReleased(InputAction::StartSimulation)) {
+        simulationStarted_ = !simulationStarted_;
+    }
+
     const bool shouldRegenerateTerrain =
         inputController_.isActionPressed(InputAction::RegenerateTerrain);
+
+    const bool shouldResetScene =
+        inputController_.isActionPressed(InputAction::ResetScene);
 
     const bool shouldLookAround =
         inputController_.isActionDown(InputAction::LookAround);
 
     if (shouldRegenerateTerrain) {
         terrainSeed_++;
+        setupTerrain();
+    }
+
+    if (shouldResetScene) {
         setupTerrain();
     }
 
