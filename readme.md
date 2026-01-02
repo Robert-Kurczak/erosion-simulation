@@ -72,25 +72,30 @@ F_{total} = F_{gravity} + F_{drag}
 $$
 
 The gravitational force is given by:
+
 $$
 \begin{aligned}
 F_{gravity} &= m \cdot a \\
 F_{gravity} &= -m \cdot g \cdot \nabla h(x, z) \\
 \end{aligned}
 $$
+
 where $\nabla h(x, z)$ denotes the gradient of the terrain height field.
 
 The drag force is modeled as linear velocity damping:
+
 $$
 F_{drag} = -v \cdot \eta_{drag}
 $$
 
 Combining both forces yields the total force acting on the droplet:
+
 $$
 F_{total} = -m \cdot g \cdot \nabla h(x, z) -v \cdot \eta_{drag}
 $$
 
 Velocity and acceleration are defined as time derivatives of the position function:
+
 $$
 \begin{aligned}
 v &= \frac {df}{dt} \\
@@ -99,6 +104,7 @@ a &= \frac {dv}{dt} = \frac{d^2f}{dt^2}
 $$
 
 Substituting these definitions into Newton’s second law:
+
 $$
 \begin{aligned}
 F_{total} &= m \cdot a \\
@@ -108,6 +114,7 @@ F_{total} &= m \cdot a \\
 $$
 
 To simplify numerical integration, the second-order differential equation is rewritten as a system of two first-order equations:
+
 $$
 \begin{aligned}
 -m \cdot g \cdot \nabla &h(x, z) -v \cdot \eta_{drag} = m \cdot \frac{dv}{dt} \\
@@ -118,6 +125,7 @@ II: \frac{dv}{dt} &= -g \cdot \nabla h(x, z) -\frac{v \cdot \eta_{drag}}{m}
 $$
 
 This system is numerically integrated using a fourth-order [Runge–Kutta method](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) (RK4):
+
 $$
 \begin{aligned}
 \frac {dy}{dt} &= f(t, y) \\
@@ -140,6 +148,7 @@ k_3 &= f(t_n + \frac {h}{2}, y_n + h\frac {k_2}{2}) \\
 k_4 &= f(t_n + h, y_n + hk_3)
 \end{aligned}
 $$
+
 where $h$ is the integration time step.
 
 ## Examples
@@ -149,7 +158,8 @@ where $h$ is the integration time step.
 ![](./examples/1-after.png)
 
 ## Sources
-1. https://catlikecoding.com/unity/tutorials/procedural-meshes/creating-a-mesh/
-2. https://bartwronski.com/2021/02/28/computing-gradients-on-grids-forward-central-and-diagonal-differences/
-3. https://medium.com/@ivo.thom.vanderveen/improved-terrain-generation-using-hydraulic-erosion-2adda8e3d99b
-4. https://www.youtube.com/watch?v=4RpVBYW1r5M
+1. https://www.firespark.de/resources/downloads/implementation%20of%20a%20methode%20for%20hydraulic%20erosion.pdf
+2. https://catlikecoding.com/unity/tutorials/procedural-meshes/creating-a-mesh/
+3. https://bartwronski.com/2021/02/28/computing-gradients-on-grids-forward-central-and-diagonal-differences/
+4. https://medium.com/@ivo.thom.vanderveen/improved-terrain-generation-using-hydraulic-erosion-2adda8e3d99b
+5. https://www.youtube.com/watch?v=4RpVBYW1r5M
