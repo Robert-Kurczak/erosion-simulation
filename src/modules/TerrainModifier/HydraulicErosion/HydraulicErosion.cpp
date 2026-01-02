@@ -74,28 +74,17 @@ WaterDroplet HydraulicErosion::getDerivatives(
     const Vector2& velocity,
     const TerrainData& terrainData
 ) {
-    // Fg = m * a
-    // Fg = -m * g * ∇h(x, z)
-    // Fd = -v * n
-    // F = Fg + Fd
-    // F = -m * g * ∇h(x, z) - v * n
-    // v = df(t)/dt
-    // a = dv/dt
-
-    // -m*g*∇h(x, z) - v * n = m * dv/dt
-
-    // df(t)/dt = v
-    // dv/dt = -g∇h(x, z) - v*n/m
-
-    static const double g = 9.81;
-    static const double n = 0.85;
-    static const double m = 1;
-
     const Vector2 gradient = calculateGradient(position, terrainData);
 
     const Vector2 acceleration {
-        float(-g * gradient.x - velocity.x * n / m),
-        float(-g * gradient.y - velocity.y * n / m)
+        float(
+            -GRAVITATIONAL_ACCELERATION_ * gradient.x -
+            velocity.x * DRAG_COEFFICIENT_ / DROPLET_MASS_FACTOR_
+        ),
+        float(
+            -GRAVITATIONAL_ACCELERATION_ * gradient.y -
+            velocity.y * DRAG_COEFFICIENT_ / DROPLET_MASS_FACTOR_
+        )
     };
 
     return WaterDroplet {velocity, acceleration, 0.0f, 0.0f};

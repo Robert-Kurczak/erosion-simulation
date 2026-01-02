@@ -14,6 +14,9 @@ private:
     static constexpr float DEPOSITION_RATE_ = 0.75f;
     static constexpr float EVAPORATION_RATE_ = 0.05f;
     static constexpr float CAPACITY_FACTOR_ = 7.35f;
+    static constexpr float GRAVITATIONAL_ACCELERATION_ = 9.81f;
+    static constexpr float DRAG_COEFFICIENT_ = 0.85f;
+    static constexpr float DROPLET_MASS_FACTOR_ = 1.0f;
 
     static constexpr std::array<std::array<float, 5>, 5> BRUSH_WEIGHTS_ {
         {{{0.02, 0.04, 0.06, 0.04, 0.02}},
